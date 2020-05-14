@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Domus",
+    "slug": "Domus",
+    "privacy": "public",
+    "sdkVersion": "35.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/domus-logo.png",
+    "splash": {
+      "image": "./assets/it-logo-03.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0096dd"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.TQS.Domus"
+    }
+  }
+}
