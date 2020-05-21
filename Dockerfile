@@ -14,7 +14,6 @@ COPY package*.json .
 RUN ls -a
 
 RUN npm install
-RUN npm install expo-cli
 
 COPY . .
 RUN npm audit fix
