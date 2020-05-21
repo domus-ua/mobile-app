@@ -6,17 +6,17 @@ ARG PLATFORM=web
 EXPOSE 19000 19001 19002
 
 # set working directory
-WORKDIR /app/
+WORKDIR /app
 
 # Copy all important files for the installation
-COPY package*.json ./
+COPY package*.json .
 
 RUN ls -a
 
-RUN npm install -g
+RUN npm install
 RUN npm install expo-cli
 
-COPY . ./
+COPY . .
 RUN npm audit fix
 
 CMD ["npm", "run", "start"]
