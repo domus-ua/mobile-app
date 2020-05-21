@@ -11,6 +11,8 @@ WORKDIR /app/
 # Copy all important files for the installation
 COPY package*.json ./
 
+RUN ls -a
+
 RUN npm install -g
 RUN npm install expo-cli
 
