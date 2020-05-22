@@ -1,12 +1,9 @@
-import React from 'react';
+import React from "react";
 
+import { Platform, Animated } from "react-native";
 
-
-import {Platform,Animated} from 'react-native';
-
-const {width, height}=Dimensions.get('screen');
-import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
-
+const { width, height } = Dimensions.get("screen");
+import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 
 import {
   ActivityIndicator,
@@ -20,67 +17,55 @@ import {
   Text,
   TouchableOpacity,
   Linking,
-  Easing
-} from 'react-native';
-import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
-export default class AuthLoadingScreen extends React.Component
- {
-
-  
+  Easing,
+} from "react-native";
+import {
+  createStackNavigator,
+  createSwitchNavigator,
+  createAppContainer,
+} from "react-navigation";
+export default class AuthLoadingScreen extends React.Component {
   constructor() {
     super();
-    this.state={
-      isLoading:true,
+    this.state = {
+      isLoading: true,
       dataSource: null,
-      userToken:'',
-      text:['A ferver água','A preparar os ingredientes','A empratar'],
-      textused:'A ferver água',
-      errorMessage:'',
-      publicidade:false,
+      userToken: "",
+      text: ["A ferver água", "A preparar os ingredientes", "A empratar"],
+      textused: "A ferver água",
+      errorMessage: "",
+      publicidade: false,
       fadeValue: new Animated.Value(0),
-      xValue:new Animated.Value(500),
-      xValue2:new Animated.Value(500)
-      
-  }
+      xValue: new Animated.Value(500),
+      xValue2: new Animated.Value(500),
+    };
   }
 
-  async componentDidMount () {
-    
-
-    
-    
+  async componentDidMount() {
     await this._bootstrapAsync();
-    console.log("My token:",this.state.userToken)
-    /*this.props.navigation.navigate('Auth')
-    if(this.state.userToken=='Auth'){
-      console.log("Auth")
-      this.props.navigation.navigate('Auth')
-    }else{
-    console.log("App")
-    this.props.navigation.navigate('App')
-    }*/
-    
-
-
-    
-       
+    this.props.navigation.navigate("Auth");
+    if (this.state.userToken == "Auth") {
+      this.props.navigation.navigate("Auth");
+    } else if (this.state.userToken == "AppNoLogin") {
+      this.props.navigation.navigate("AppNoLogin");
+    } else {
+      this.props.navigation.navigate("App");
+    }
   }
-
-
 
   // Fetch the token from storage then navigate to our appropriate place
   _bootstrapAsync = async () => {
-    const userToken = await AsyncStorage.getItem('SignedIn');
-    console.log("My userToken V2",userToken)
-    if (userToken== null) {
+    const userToken = await AsyncStorage.getItem("SignedIn");
+    console.log("My userToken V2", userToken);
+    if (userToken == null) {
       // We have data!!
       this.setState({
-        userToken:'Auth'
-      })
-    }else{
+        userToken: "Auth",
+      });
+    } else {
       this.setState({
-        userToken:userToken
-      })
+        userToken: userToken,
+      });
     }
 
     // This will switch to the App screen or Auth screen and this loading
@@ -88,19 +73,19 @@ export default class AuthLoadingScreen extends React.Component
     //this.props.navigation.navigate(userToken ? 'App' : 'Auth');
   };
 
-  
   // Render any loading content that you like here
   render() {
-    
-    
     return (
-    <View style={styles.container}>
-    <View style={{marginHorizontal:10}}>
-    <Image source={require('../../assets/domus-logo.png')} style={styles.companyImage}
-    
-        />
-    </View>  
-    </View>
+      <View style={styles.container}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Image
+            source={require("../../assets/domus-logo.png")}
+            style={styles.companyImage}
+          />
+        </View>
+      </View>
     );
   }
 }
@@ -108,20 +93,13 @@ export default class AuthLoadingScreen extends React.Component
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: Platform.OS === "android" ?  0 : 20,
-    
-    backgroundColor:"#0096dd"
+    marginTop: Platform.OS === "android" ? 0 : 20,
+
+    backgroundColor: "#413C90",
   },
- 
+
   companyImage: {
-    flex:1,
-    width:moderateScale(60),
-    height:moderateScale(30),
-    borderRadius:moderateScale(30),
-    
-    
-
+    width: moderateScale(200),
+    height: moderateScale(200),
   },
-  
 });
-
