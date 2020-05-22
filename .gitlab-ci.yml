@@ -5,7 +5,7 @@ stages:
   - test
   - docker
 
-.lint:
+lint:
   stage: lint
   script:
     - npm install eslint -g
@@ -14,10 +14,11 @@ stages:
     - npm install eslint-plugin-react@latest
     - eslint --fix --max-warnings 20 src/ || echo "Skipping errors for now..."
 
-test:
+.test:
   stage: test
   script:
-    - echo "Testing..."
+    - npm install -g --only=dev
+    - npm run test
 
 docker:
   stage: docker
