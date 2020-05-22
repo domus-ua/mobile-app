@@ -13,9 +13,9 @@
     "orientation": "portrait",
     "icon": "./assets/domus-logo.png",
     "splash": {
-      "image": "./assets/it-logo-03.png",
+      "image": "./assets/domus-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0096dd"
+      "backgroundColor": "#413C90"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

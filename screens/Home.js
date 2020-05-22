@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
 const { width, height } = Dimensions.get("screen");
 import theme from "../constants/theme.style.js";
+import OfflineNotice from "../components/OfflineNotice";
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -140,7 +141,10 @@ export default class Home extends React.Component {
       );
     } else {
       return (
-        <View style={styles.container}>
+        <View style={{flex:1}}>
+          
+          <OfflineNotice />
+          <View style={styles.container}>
           <View style={{ flex: 0.2}}>
             <View style={styles.searchSection}>
               <TextInput
@@ -165,6 +169,10 @@ export default class Home extends React.Component {
             </View>
           </View>
           <View style={{ flex: 0.8 }}></View>
+
+          </View>
+          
+          
         </View>
       );
     }
@@ -173,8 +181,8 @@ export default class Home extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    marginTop: 30
+    flex: 0.95,
+    marginTop: 30,
   },
   squareView: {
     flex: 1,

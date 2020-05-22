@@ -1,8 +1,8 @@
 export default {
   accent: "#F3534A",
-  primary_color: "rgba(199,55,55,1)",
-  secondary: "#2BDA8E",
-  tertiary: "#FFE358",
+  primary_color: "#413C90",
+  secondary: "#7A7EBC",
+  tertiary: "#A0B0DB",
   black: "#323643",
   white: "#FFFFFF",
   gray: "rgba(113,113,113,1)",
