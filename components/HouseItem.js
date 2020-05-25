@@ -45,12 +45,15 @@ export default class Register extends React.Component {
     last_name: "",
     password: "",
     height: "",
+    favorite: false,
     current_weight: "",
     weight_goal: "",
     day: "Pick a day",
     sex: "",
     phone_number: "",
     photo: "../assets/tomas.png",
+    baseURL: "http://192.168.160.60:8080/",
+
     photo_base64: "",
     number_of_servings: "",
     choosen_type_of_meal: "",
@@ -85,71 +88,147 @@ export default class Register extends React.Component {
   }
 
   renderHeart() {
-    if (this.props.favorite) {
+    if (this.props.locatarioId == null) {
       return (
-        <View style={{ flex: 0.5 }}>
-          <View
-            style={{
-              flex: 0.2,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              marginLeft: 10,
-              marginTop: 10,
-            }}
-          >
-            <TouchableOpacity
-              style={{ flex: 0.2, justifyContent: "flex-start" }}
-              onPress={() => {
-                this.props.seguirRestaurante(this.props.codrestaurante, 1);
-              }}
-            >
-              <Ionicons
-                ios="md-heart"
-                name="md-heart"
-                size={moderateScale(40)}
-                style={{ color: theme.red }}
-              >
-                {" "}
-              </Ionicons>
-            </TouchableOpacity>
-          </View>
-          <View style={{ flex: 0.8 }}></View>
+        <View
+          style={{
+            flex: 0.5,
+            alignItems: "flex-end",
+            justifyContent: "center",
+          }}
+        >
+          
         </View>
       );
     } else {
-      return (
-        <View style={{ flex: 0.5 }}>
-          <View
-            style={{
-              flex: 0.2,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              marginLeft: 10,
-              marginTop: 10,
-            }}
-          >
-            <TouchableOpacity
-              style={{ flex: 0.2, justifyContent: "flex-start" }}
-              onPress={() => {
-                this.props.seguirRestaurante(this.props.codrestaurante, 0);
+      if (this.state.favorite) {
+        return (
+          <View style={{ flex: 0.5 }}>
+            <View
+              style={{
+                flex: 0.2,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                marginLeft: 10,
+                marginTop: 10,
               }}
             >
-              <Ionicons
-                ios="md-heart-empty"
-                name="md-heart-empty"
-                size={moderateScale(40)}
-                style={{ color: "white" }}
+              <TouchableOpacity
+                style={{ flex: 0.2, justifyContent: "flex-start" }}
+                onPress={() => {
+                  this.removeFavorite();
+                }}
               >
-                {" "}
-              </Ionicons>
-            </TouchableOpacity>
+                <Ionicons
+                  ios="md-heart"
+                  name="md-heart"
+                  size={moderateScale(40)}
+                  style={{ color: theme.red }}
+                >
+                  {" "}
+                </Ionicons>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flex: 0.8 }}></View>
           </View>
-          <View style={{ flex: 0.8 }}></View>
-        </View>
-      );
+        );
+      } else {
+        return (
+          <View style={{ flex: 0.5 }}>
+            <View
+              style={{
+                flex: 0.2,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                marginLeft: 10,
+                marginTop: 10,
+              }}
+            >
+              <TouchableOpacity
+                style={{ flex: 0.2, justifyContent: "flex-start" }}
+                onPress={() => {
+                  this.addFavorite();
+                }}
+              >
+                <Ionicons
+                  ios="md-heart-empty"
+                  name="md-heart-empty"
+                  size={moderateScale(40)}
+                  style={{ color: "white" }}
+                >
+                  {" "}
+                </Ionicons>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flex: 0.8 }}></View>
+          </View>
+        );
+      }
     }
+  }
+
+  async removeFavorite() {
+    const { baseURL, userName, userPassword } = this.state;
+
+    // fetch data
+
+    fetch(baseURL + "api/locatarios/wishlist", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        //change these params later
+        houseId: this.props.id,
+        locatarioId: this.props.locatarioId,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response;
+      })
+      .then((data) => {
+        console.log(data);
+        this.setState({
+          favorite: false,
+        });
+      })
+      .catch((error) => {
+        console.log("error: " + error);
+      });
+  }
+
+  async addFavorite() {
+    const { baseURL, userName, userPassword } = this.state;
+
+    // fetch data
+
+    fetch(baseURL + "api/locatarios/wishlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        //change these params later
+        houseId: this.props.id,
+        locatarioId: this.props.locatarioId,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response;
+      })
+      .then((data) => {
+        console.log(data);
+        this.setState({
+          favorite: true,
+        });
+      })
+      .catch((error) => {
+        console.log("error: " + error);
+      });
   }
 
   render() {
@@ -189,9 +268,9 @@ export default class Register extends React.Component {
                 backgroundColor: "rgba(0,0,0,0.5)",
                 borderRadius: 12,
               }}
-
-              onPress={() =>    NavigationService.navigate("HouseDetail", {id:this.props.id})
-            }
+              onPress={() =>
+                NavigationService.navigate("HouseDetail", { id: this.props.id })
+              }
             >
               {this.renderHeart()}
               <View style={{ flex: 0.5 }}>
