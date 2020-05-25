@@ -25,6 +25,7 @@ import {
   SimpleLineIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import NavigationService from "../components/NavigationService";
 
 import { ScrollView, FlatList } from "react-native-gesture-handler";
 import themeStyle from "../constants/theme.style.js";
@@ -188,6 +189,9 @@ export default class Register extends React.Component {
                 backgroundColor: "rgba(0,0,0,0.5)",
                 borderRadius: 12,
               }}
+
+              onPress={() =>    NavigationService.navigate("HouseDetail", {id:this.props.id})
+            }
             >
               {this.renderHeart()}
               <View style={{ flex: 0.5 }}>

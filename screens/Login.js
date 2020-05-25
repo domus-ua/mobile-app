@@ -81,6 +81,9 @@ export default class Login extends Component {
   async noLogin() {
     try {
       await AsyncStorage.setItem("SignedIn", "AppNoLogin");
+      await AsyncStorage.removeItem("cod");
+      await AsyncStorage.removeItem("username");
+      await AsyncStorage.removeItem("pwd");
       NavigationService.navigate("HomeNoLogin");
     } catch (error) {
       console.log(error);
