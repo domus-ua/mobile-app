@@ -5,6 +5,10 @@ stages:
   - test
   - docker
 
+cache:
+  paths:
+    - ~/.cache/
+
 lint:
   stage: lint
   script:
