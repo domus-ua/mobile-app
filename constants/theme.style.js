@@ -3,6 +3,7 @@ export default {
   primary_color: "#413C90",
   secondary: "#7A7EBC",
   tertiary: "#A0B0DB",
+  red:"rgba(199,55,55,1)",
   black: "#323643",
   white: "#FFFFFF",
   gray: "rgba(113,113,113,1)",
