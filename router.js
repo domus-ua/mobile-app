@@ -139,7 +139,7 @@ const AppNavigatorFinal = createSwitchNavigator(
     AuthLoading: AuthLoadingScreen,
   },
   {
-    initialRouteName: "Auth",
+    initialRouteName: "AuthLoading",
   }
 );
 

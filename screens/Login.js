@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from "react";
 import {
   StyleSheet,
   Text,
@@ -35,12 +35,10 @@ export default class Login extends Component {
 
   _storeData = async () => {
     try {
-      /*console.log(this.state.userCode+" "+this.state.name+" "+this.state.companyName)*/
-        await AsyncStorage.setItem('cod', this.state.userCode.toString());
-        /*await AsyncStorage.setItem('name', this.state.name);
-        await AsyncStorage.setItem('username', this.state.userName);
-        await AsyncStorage.setItem('pwd', this.state.userPassword);
-        */
+      await AsyncStorage.setItem("cod", this.state.userCode.toString());
+      await AsyncStorage.setItem("username", this.state.userName);
+      await AsyncStorage.setItem("pwd", this.state.userPassword);
+
       //await AsyncStorage.setItem("token", this.state.userToken);
       /*await AsyncStorage.setItem('token', this.state.userToken);
         const nameCompany= await AsyncStorage.getItem('nameCompany');
@@ -99,9 +97,8 @@ export default class Login extends Component {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": login_info
+          Authorization: login_info,
         },
-        
       })
         .then((response) => {
           if (!response.ok) {
@@ -114,7 +111,6 @@ export default class Login extends Component {
           this.setState(
             {
               userCode: data["id"],
-              
             },
             () => {
               this._storeData();
@@ -178,135 +174,136 @@ export default class Login extends Component {
   }
   render() {
     return (
-      <View style={{flex:1}}>
+      <View style={{ flex: 1 }}>
         <OfflineNotice />
 
-        <View style={styles.container} >
-        <View style={{ flex:0.9,justifyContent:"center" }}>
-          <View style={{ height: moderateScale(400), width: moderateScale(300) }}>
-          <View style={{ paddingBottom: 40 }}>
-            <Text testID="titleText" style={{ color: "white", fontSize: 28, textAlign: "center" }}>
-              Sign In
-            </Text>
-          </View>
-          <View style={{ backgroundColor: "white", flex: 1, borderRadius: 10 }}>
+        <View style={styles.container}>
+          <View style={{ flex: 0.9, justifyContent: "center" }}>
             <View
-              style={{
-                flex: 0.5,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+              style={{ height: moderateScale(400), width: moderateScale(300) }}
             >
+              <View style={{ paddingBottom: 40 }}>
+                <Text
+                  testID="titleText"
+                  style={{ color: "white", fontSize: 28, textAlign: "center" }}
+                >
+                  Sign In
+                </Text>
+              </View>
               <View
-                style={{
-                  flexDirection: "row",
-                  marginBottom: 15,
-                  marginTop: 15,
-                  borderBottomWidth: 1,
-                  borderColor: this.state.inputcolor1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                style={{ backgroundColor: "white", flex: 1, borderRadius: 10 }}
               >
-                <Ionicons
-                  name={"md-people"}
-                  size={moderateScale(30)}
-                  color={this.state.inputcolor1}
-                  style={{ paddingHorizontal: 15 }}
-                />
-
-                <TextInput
-                  placeholder="User name"
-                  onFocus={() => this.onFocus1()}
-                  onBlur={() => this.onBlur1()}
-                  testID="username"
+                <View
                   style={{
-                    flex: 1,
-                    height: moderateScale(40),
-                    color: "#000",
-                    fontSize: moderateScale(20),
+                    flex: 0.5,
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
-                  returnKeyType="next"
-                  onSubmitEditing={() => this.passwordInput.focus()}
-                  onChangeText={(userName) => this.setState({ userName })}
-                />
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginBottom: 15,
+                      marginTop: 15,
+                      borderBottomWidth: 1,
+                      borderColor: this.state.inputcolor1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Ionicons
+                      name={"md-people"}
+                      size={moderateScale(30)}
+                      color={this.state.inputcolor1}
+                      style={{ paddingHorizontal: 15 }}
+                    />
+
+                    <TextInput
+                      placeholder="User name"
+                      onFocus={() => this.onFocus1()}
+                      onBlur={() => this.onBlur1()}
+                      testID="username"
+                      style={{
+                        flex: 1,
+                        height: moderateScale(40),
+                        color: "#000",
+                        fontSize: moderateScale(20),
+                      }}
+                      returnKeyType="next"
+                      onSubmitEditing={() => this.passwordInput.focus()}
+                      onChangeText={(userName) => this.setState({ userName })}
+                    />
+                  </View>
+                </View>
+                <View
+                  style={{
+                    flex: 0.5,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginBottom: 15,
+                      borderBottomWidth: 1,
+                      borderColor: this.state.inputcolor2,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Ionicons
+                      name={"md-lock"}
+                      size={moderateScale(30)}
+                      color={this.state.inputcolor2}
+                      style={{ paddingHorizontal: 15 }}
+                    />
+
+                    <TextInput
+                      placeholder="Password"
+                      testID="password"
+                      onFocus={() => this.onFocus2()}
+                      onBlur={() => this.onBlur2()}
+                      style={{
+                        flex: 1,
+                        height: moderateScale(40),
+                        color: "#000",
+                        fontSize: moderateScale(20),
+                      }}
+                      returnKeyType="done"
+                      secureTextEntry={true}
+                      onSubmitEditing={() => this.login()}
+                      ref={(input) => (this.passwordInput = input)}
+                      onChangeText={(userPassword) =>
+                        this.setState({ userPassword })
+                      }
+                    />
+                  </View>
+                </View>
+                <View
+                  style={{
+                    flex: 0.6,
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={styles.loginGoogleButton}
+                    onPress={() => this.login()}
+                    testID="signInButton"
+                  >
+                    <Text testID="buttonText" style={styles.loginButtonText}>
+                      Sign In
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => this.noLogin()}>
+                    <Text style={styles.ignoreStep}>Ignore this step</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-            <View
-              style={{
-                flex: 0.5,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  marginBottom: 15,
-                  borderBottomWidth: 1,
-                  borderColor: this.state.inputcolor2,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Ionicons
-                  name={"md-lock"}
-                  size={moderateScale(30)}
-                  color={this.state.inputcolor2}
-                  style={{ paddingHorizontal: 15 }}
-                />
-
-                <TextInput
-                  placeholder="Password"
-                  testID="password"
-                  onFocus={() => this.onFocus2()}
-                  onBlur={() => this.onBlur2()}
-                  style={{
-                    flex: 1,
-                    height: moderateScale(40),
-                    color: "#000",
-                    fontSize: moderateScale(20),
-                  }}
-                  returnKeyType="done"
-                  secureTextEntry={true}
-                  onSubmitEditing={() => this.login()}
-                  ref={(input) => (this.passwordInput = input)}
-                  onChangeText={(userPassword) =>
-                    this.setState({ userPassword })
-                  }
-                />
-              </View>
-            </View>
-            <View
-              style={{
-                flex: 0.6,
-                justifyContent: "space-around",
-                alignItems: "center",
-              }}
-            >
-              <TouchableOpacity
-                style={styles.loginGoogleButton}
-                onPress={() => this.login()}
-                testID="signInButton"
-              >
-                <Text testID="buttonText" style={styles.loginButtonText}>Sign In</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => this.noLogin()}>
-                <Text style={styles.ignoreStep}>Ignore this step</Text>
-            </TouchableOpacity>
-              
-            </View>
           </View>
-
-          </View>
-          
-          
-          
         </View>
-        
-
-        </View>
-        
       </View>
     );
   }
