@@ -1,10 +1,10 @@
 {
   "expoServerPort": 19000,
   "packagerPort": 19001,
-  "packagerPid": 11048,
+  "packagerPid": 25332,
   "expoServerNgrokUrl": "https://e9-pkb.jmnmv12.mobile-application.exp.direct",
   "packagerNgrokUrl": "https://packager.e9-pkb.jmnmv12.mobile-application.exp.direct",
-  "ngrokPid": 2228,
+  "ngrokPid": 8508,
   "webpackServerPort": null,
   "devToolsPort": 19002
 }

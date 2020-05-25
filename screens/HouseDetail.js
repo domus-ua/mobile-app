@@ -17,15 +17,27 @@ import {
   RefreshControl,
   TextInput,
   FlatList,
+  ImageBackground,
+  Platform,
+  Linking,
 } from "react-native";
 import Animated from "react-native-reanimated";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialIcons,
+  MaterialCommunityIcons,
+  SimpleLineIcons,
+  Entypo,
+  FontAwesome,
+  Octicons,
+} from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
 const { width, height } = Dimensions.get("screen");
 import theme from "../constants/theme.style.js";
 import OfflineNotice from "../components/OfflineNotice";
 import HouseItem from "../components/HouseItem";
-
+import NavigationService from "../components/NavigationService";
+import MapView, { Marker } from "react-native-maps";
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
@@ -34,15 +46,7 @@ export default class Home extends React.Component {
       searchString: "",
       SharedLoading: true,
       refresh: false,
-      bedroomNo1: false,
-      bedroomNo2: false,
-      bedroomNo3: false,
-      bedroomNo4: false,
-      bedroomNo5: false,
-      higherRating: false,
-      lowerRating: false,
-      higherPrice: false,
-      lowerPrice: false,
+      houseId: "",
       isLoading: true,
       userName: null,
       userPassword: null,
@@ -52,6 +56,8 @@ export default class Home extends React.Component {
       minPrice: "",
       maxPrice: "",
       baseURL: "http://192.168.160.60:8080/",
+      googleAPI: "AIzaSyDoZX2PofG0w-AOuHSWD8RRtSq6dxeS9mA",
+      location: null,
 
       refreshing: false,
       houseDataSource: [
@@ -131,106 +137,56 @@ export default class Home extends React.Component {
     };
   }
 
-  async getInfo() {
-    const { baseURL, userName, userPassword } = this.state;
-
-    login_info = "Basic " + Base64.btoa(userName + ":" + userPassword);
-    city_string = "";
-    minPrice_string = "";
-    maxPrice_string = "";
-    bedroom_string = "";
-    orderBy_string = "";
-    if (this.state.displaySearchString != "") {
-      city_string = "city=" + this.state.displaySearchString;
-    }
-
-    if (this.state.minPrice != "") {
-      minPrice_string = "minPrice=" + this.state.minPrice;
-    }
-
-    if (this.state.maxPrice != "") {
-      maxPrice_string = "maxPrice=" + this.state.maxPrice;
-    }
-
-    if (this.state.bedroomNo1) {
-      bedroom_string = "nRooms=1";
-    }
-
-    if (this.state.bedroomNo2) {
-      bedroom_string = "nRooms=2";
-    }
-
-    if (this.state.bedroomNo3) {
-      bedroom_string = "nRooms=3";
-    }
-
-    if (this.state.bedroomNo4) {
-      bedroom_string = "nRooms=4";
-    }
-
-    if (this.state.bedroomNo5) {
-      bedroom_string = "nRooms=5";
-    }
-
-    if (this.state.higherRating) {
-      orderBy_string = "desc=true&orderAttribute=rating";
-    }
-
-    if (this.state.lowerRating) {
-      orderBy_string = "desc=false&orderAttribute=rating";
-    }
-
-    if (this.state.higherPrice) {
-      orderBy_string = "desc=true&orderAttribute=price";
-    }
-
-    if (this.state.lowerPrice) {
-      orderBy_string = "desc=false&orderAttribute=price";
-    }
-
+  async getLocation(address) {
     console.log(
-      baseURL +
-        "api/houses?" +
-        city_string +
-        "&" +
-        minPrice_string +
-        "&" +
-        maxPrice_string +
-        "&" +
-        bedroom_string +
-        "&" +
-        orderBy_string
+      "https://maps.google.com/maps/api/geocode/json?address=" +
+        address +
+        "&key=" +
+        this.state.googleAPI
     );
-    // fetch data
     fetch(
-      baseURL +
-        "api/houses?" +
-        city_string +
-        "&" +
-        minPrice_string +
-        "&" +
-        maxPrice_string +
-        "&" +
-        bedroom_string +
-        "&" +
-        orderBy_string,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      "https://maps.google.com/maps/api/geocode/json?address=" +
+        address +
+        "&key=" +
+        this.state.googleAPI
     )
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
         else return response.json();
       })
-      .then((data) => {
+
+      .then((res) => {
+        console.log(res["results"][0]["geometry"]);
         this.setState({
-          houseDataSource: data,
+          location: res["results"][0]["geometry"]["location"],
           isLoading: false,
           refresh: false,
         });
+      });
+  }
+
+  async getInfo() {
+    const { baseURL, userName, userPassword, houseId } = this.state;
+
+    console.log(baseURL + "api/houses/" + houseId);
+    // fetch data
+    fetch(baseURL + "api/houses/" + houseId, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        this.setState({
+          houseDataSource: data,
+        });
+        console.log(data["street"]);
+        this.getLocation(data["street"]);
       })
       .catch((error) => {
         console.log("error: " + error);
@@ -252,10 +208,9 @@ export default class Home extends React.Component {
           userPassword: userPassword,
           userCode: value,
         });
-      }else{
+      } else {
         this.setState({
           SharedLoading: false,
-          
         });
       }
     } catch (error) {
@@ -277,7 +232,8 @@ export default class Home extends React.Component {
   };
 
   async componentDidMount() {
-    console.log(width);
+    let id = this.props.navigation.getParam("id", null);
+    this.setState({ houseId: id });
     await this._retrieveData();
     if (this.state.SharedLoading == false) {
       console.log(this.state.userCode);
@@ -345,7 +301,6 @@ export default class Home extends React.Component {
 
     return (
       <HouseItem
-        id={item.id}
         photo={photo}
         name={item.name}
         price={item.price}
@@ -619,145 +574,618 @@ export default class Home extends React.Component {
   bs = React.createRef();
   fall = new Animated.Value(1);
 
-  render() {
-    if (this.state.isLoading) {
+  renderHeart() {
+    if (this.props.favorite) {
       return (
-        <View style={{ flex: 1 }}>
-          <OfflineNotice />
-          <Animated.View
+        <View
+          style={{
+            flex: 0.5,
+            alignItems: "flex-end",
+            justifyContent: "center",
+          }}
+        >
+          <View
             style={{
               flex: 1,
-              marginTop: 30,
-              opacity: Animated.add(0.1, Animated.multiply(this.fall, 0.9)),
-            }}
-          >
-            <View style={{ flex: 0.2 }}>
-              <View style={styles.searchSection}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Find a Room in"
-                  testID="citySearch"
-                  onChangeText={(searchString) => {
-                    this.setState({ searchString });
-                  }}
-                  underlineColorAndroid="transparent"
-                />
-                <TouchableOpacity
-                  onPress={() => this.searchCity()}
-                  testID="citySearchButton"
-                >
-                  <Ionicons
-                    style={styles.searchIcon}
-                    name="md-search"
-                    size={moderateScale(25)}
-                    color="black"
-                  />
-                </TouchableOpacity>
-              </View>
-              {this.renderCitytext()}
-            </View>
-            <View style={{ flex: 0.8, justifyContent: "center" }}>
-              <ActivityIndicator size="large" color={theme.secondary} />
-            </View>
-          </Animated.View>
-          <LinearGradient
-            colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 0.1 * height,
-              justifyContent: "center",
+              flexDirection: "row",
               alignItems: "center",
+              justifyContent: "flex-end",
             }}
           >
             <TouchableOpacity
-              style={styles.filter}
-              onPress={() => this.bs.current.snapTo(1)}
+              style={{ flex: 0.5, alignItems: "center" }}
+              onPress={() => {
+                //this.props.seguirRestaurante(this.props.codrestaurante, 0);
+              }}
             >
-              <Text style={styles.filterText}>Filter</Text>
+              <Ionicons
+                ios="md-heart-empty"
+                name="md-heart-empty"
+                size={moderateScale(40)}
+                style={{ color: theme.red }}
+              >
+                {" "}
+              </Ionicons>
             </TouchableOpacity>
-          </LinearGradient>
-          <BottomSheet
-            ref={this.bs}
-            renderContent={this.renderInner}
-            renderHeader={this.renderHeader}
-            snapPoints={[0, 500]}
-            initialSnap={0}
-            callbackNode={this.fall}
-            enabledInnerScrolling={false}
-            enabledContentTapInteraction={false}
-          />
+          </View>
         </View>
       );
     } else {
       return (
-        <View style={{ flex: 1 }}>
-          <OfflineNotice />
-          <Animated.View
+        <View
+          style={{
+            flex: 0.5,
+            alignItems: "flex-end",
+            justifyContent: "center",
+          }}
+        >
+          <View
             style={{
               flex: 1,
-              marginTop: 30,
-              opacity: Animated.add(0.1, Animated.multiply(this.fall, 0.9)),
-            }}
-          >
-            <View style={{ flex: 0.2, zIndex: 1 }}>
-              <View style={styles.searchSection}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Find a Room in"
-                  testID="citySearch"
-                  onChangeText={(searchString) => {
-                    this.setState({ searchString });
-                  }}
-                  underlineColorAndroid="transparent"
-                />
-                <TouchableOpacity
-                  onPress={() => this.searchCity()}
-                  testID="citySearchButton"
-                >
-                  <Ionicons
-                    style={styles.searchIcon}
-                    name="md-search"
-                    size={moderateScale(25)}
-                    color="black"
-                  />
-                </TouchableOpacity>
-              </View>
-              {this.renderCitytext()}
-            </View>
-            <View style={{ flex: 0.8 }}>{this.renderList()}</View>
-          </Animated.View>
-          <LinearGradient
-            colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 0.1 * height,
-              justifyContent: "center",
+              flexDirection: "row",
               alignItems: "center",
+              justifyContent: "flex-end",
             }}
           >
             <TouchableOpacity
-              style={styles.filter}
-              onPress={() => this.bs.current.snapTo(1)}
+              style={{ flex: 0.5, alignItems: "center" }}
+              onPress={() => {
+                //this.props.seguirRestaurante(this.props.codrestaurante, 0);
+              }}
             >
-              <Text style={styles.filterText}>Filter</Text>
+              <Ionicons
+                ios="md-heart-empty"
+                name="md-heart-empty"
+                size={moderateScale(40)}
+                style={{ color: "white" }}
+              >
+                {" "}
+              </Ionicons>
             </TouchableOpacity>
-          </LinearGradient>
-          <BottomSheet
-            ref={this.bs}
-            renderContent={this.renderInner}
-            renderHeader={this.renderHeader}
-            snapPoints={[0, 500]}
-            initialSnap={0}
-            callbackNode={this.fall}
-            enabledInnerScrolling={false}
-            enabledContentTapInteraction={false}
+          </View>
+        </View>
+      );
+    }
+  }
+
+  renderFacilitiesComponent = (facilities) => {
+    var components = [];
+
+    for (index = 0; index < facilities.length; ++index) {
+      console.log(facilities[index]);
+      components.push(
+        <View
+          style={{
+            flex: 0.25,
+            flexDirection: "row",
+            alignItems: "flex-start",
+            justifyContent: "flex-start",
+            marginLeft: moderateScale(10),
+            marginTop: moderateScale(5),
+          }}
+        >
+          <FontAwesome
+            style={styles.featureIcon}
+            name="square"
+            size={moderateScale(20)}
+            color="#8696A9"
           />
+          <Text style={styles.featureText}>{facilities[index]}</Text>
+        </View>
+      );
+    }
+    return components;
+  };
+
+  renderFacilities = (facilities) => {
+    if (facilities.length != 0) {
+      facilitiesArray = facilities.split(";");
+
+      var half_length = Math.ceil(facilitiesArray.length / 2);
+
+      var leftSide = facilitiesArray.splice(0, half_length);
+      var rightSide = facilitiesArray.splice(-half_length);
+      console.log(leftSide);
+      console.log(rightSide);
+    }
+
+    if (facilities.length != 0) {
+      return (
+        <View
+          style={{
+            flexDirection: "row",
+            flex: 1,
+            marginTop: moderateScale(10),
+          }}
+        >
+          <View style={{ flex: 0.5 }}>
+            {this.renderFacilitiesComponent(leftSide)}
+          </View>
+          <View style={{ flex: 0.5 }}>
+            {this.renderFacilitiesComponent(rightSide)}
+          </View>
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={{
+            flexDirection: "row",
+            flex: 1,
+            marginTop: moderateScale(10),
+          }}
+        >
+          <Text style={styles.featureText}>
+            The author did not specify any facilities!
+          </Text>
+        </View>
+      );
+    }
+  };
+
+  dialCall = (number) => {
+    let phoneNumber = "";
+    if (Platform.OS === "android") {
+      phoneNumber = `tel:${number}`;
+    } else {
+      phoneNumber = `telprompt:${number}`;
+    }
+    Linking.openURL(phoneNumber);
+  };
+
+  renderHousePhotos = (photos) => {
+    var images = [];
+    for (index = 0; index < photos.length; ++index) {
+      console.log(photos[index]);
+      images.push(
+        <View
+          style={{
+            flex: 1,
+          }}
+          key={index}
+        >
+          <ImageBackground
+            imageStyle={{ opacity: 0.9 }}
+            source={{ uri: photos[index] }}
+            style={{
+              width: width,
+              height: "100%",
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "space-between",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
+            >
+              <View
+                style={{
+                  flex: 0.15,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "flex-start",
+                    color: "white",
+                    marginLeft: moderateScale(15),
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => {
+                      this.props.navigation.goBack(null);
+                    }}
+                  >
+                    <Ionicons
+                      color="white"
+                      name="md-arrow-back"
+                      size={moderateScale(28)}
+                    ></Ionicons>
+                  </TouchableOpacity>
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    //justifyContent: "flex-end",
+                    marginRight: moderateScale(15),
+                  }}
+                >
+                  {this.renderHeart()}
+                  <View style={{ flex: 0.5 }}>
+                    <View
+                      style={{
+                        flex: 0.2,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <Text style={styles.ratingText}>
+                        {this.state.houseDataSource["averageRating"]}{" "}
+                      </Text>
+                      <Ionicons
+                        name="ios-star"
+                        size={moderateScale(30)}
+                        style={{ color: "#f2b01e" }}
+                      ></Ionicons>
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <View style={{ flex: 0.7 }}></View>
+              <View
+                style={{
+                  flex: 0.15,
+                  alignItems: "center",
+                  marginLeft: moderateScale(15),
+                  flexDirection: "row",
+                }}
+              >
+                <Text style={styles.priceText}>
+                  {this.state.houseDataSource["price"]} €
+                </Text>
+                <Text style={styles.subPriceText}> per month</Text>
+              </View>
+            </View>
+          </ImageBackground>
+        </View>
+      );
+    }
+    return images;
+  };
+
+  renderVerified = () => {
+    if (this.state.houseDataSource.locador.verified) {
+      return (
+        <View
+          style={{
+            flex: 0.4,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Octicons
+            style={styles.featureIcon}
+            name="verified"
+            size={moderateScale(20)}
+            color="green"
+          />
+          <Text style={styles.featureText}>Verified by ©Domus</Text>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  renderOwner = () => {
+    if (this.state.userCode != null) {
+      return (
+        <View
+          style={{
+            flexDirection: "row",
+            flex: 1,
+            marginTop: moderateScale(10),
+          }}
+        >
+          <View
+            style={{
+              flex: 0.2,
+              alignItems: "center",
+            }}
+          >
+            <Image
+              source={{ uri: locadorPhoto }}
+              style={{
+                width: moderateScale(50),
+                height: moderateScale(50),
+                borderRadius: moderateScale(30),
+                marginHorizontal: 5,
+              }}
+            ></Image>
+          </View>
+          <View style={{ flex: 0.4 }}>
+            <View style={{ flex: 0.5 }}>
+              <Text style={styles.facilitiesTitle}>
+                {this.state.houseDataSource["locador"]["user"]["firstName"]}{" "}
+                {this.state.houseDataSource["locador"]["user"]["lastName"]}
+              </Text>
+            </View>
+            <View style={{ flex: 0.5 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  this.dialCall(
+                    this.state.houseDataSource["locador"]["user"]["phoneNumber"]
+                  );
+                }}
+              >
+                <Text style={styles.featureText}>
+                  {this.state.houseDataSource["locador"]["user"]["phoneNumber"]}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          {this.renderVerified()}
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent:"center",
+            flex: 1,
+            marginTop: moderateScale(10),
+          }}
+        >
+          
+            
+              <Text style={styles.featureText}>
+                You need an account to view the owner details!
+              </Text>
+            
+            
+        </View>
+      );
+    }
+  };
+
+  render() {
+    if (this.state.isLoading) {
+      return (
+        <ActivityIndicator
+          color={theme.primary_color}
+          size="large"
+        ></ActivityIndicator>
+      );
+    } else {
+      if (this.state.houseDataSource.photos.length == 0) {
+        photos = ["http://192.168.160.60:3000/static/media/home.200c1988.jpg"];
+      } else {
+        photos = this.state.houseDataSource.photos;
+      }
+      if (this.state.houseDataSource["locador"]["user"]["photo"] == null) {
+        locadorPhoto =
+          "http://192.168.160.60:3000/static/media/default-user.9d1403c3.png";
+      } else {
+        locadorPhoto = this.state.houseDataSource["locador"]["user"]["photo"];
+      }
+
+      console.log(this.state.location["lat"]);
+      var markers = [
+        {
+          latitude: this.state.location["lat"],
+          longitude: this.state.location["lng"],
+          title: "House",
+          subtitle: this.state.houseDataSource["street"],
+        },
+      ];
+
+      return (
+        <View style={{ flex: 1 }}>
+          <OfflineNotice />
+          <ScrollView
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            pagingEnabled={true}
+            showsHorizontalScrollIndicator={true}
+            style={{ flex: 0.1, marginTop: 28 }}
+          >
+            {this.renderHousePhotos(photos)}
+          </ScrollView>
+          <View style={{ flex: 0.9 }}>
+            <ScrollView style={{ flex: 1 }}>
+              <View
+                style={{
+                  flex: 0.33,
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  marginHorizontal: 10,
+                  marginTop: moderateScale(15),
+                }}
+              >
+                <View
+                  style={{
+                    flex: 0.36,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <TouchableOpacity>
+                    <Ionicons
+                      style={styles.featureIcon}
+                      name="ios-bed"
+                      size={moderateScale(25)}
+                      color="#8696A9"
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.featureText}>
+                    {this.state.houseDataSource["noRooms"]} Bedroom
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 0.36,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <TouchableOpacity>
+                    <MaterialCommunityIcons
+                      style={styles.featureIcon}
+                      name="shower"
+                      size={moderateScale(25)}
+                      color="#8696A9"
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.featureText}>
+                    {this.state.houseDataSource["noBathrooms"]} Bathroom
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 0.25,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginLeft: moderateScale(10),
+                  }}
+                >
+                  <TouchableOpacity>
+                    <SimpleLineIcons
+                      style={styles.featureIcon}
+                      name="size-fullscreen"
+                      size={moderateScale(20)}
+                      color="#8696A9"
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.featureText}>
+                    {this.state.houseDataSource["habitableArea"]} m2
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.5,
+                  flexDirection: "row",
+                  paddingBottom: 20,
+                  borderBottomWidth: 1,
+                  borderColor: "#8696A9",
+                  marginLeft: moderateScale(19),
+                  marginRight: moderateScale(15),
+                  marginTop: moderateScale(15),
+                }}
+              >
+                <TouchableOpacity>
+                  <Entypo
+                    style={styles.featureIcon}
+                    name="location"
+                    size={moderateScale(20)}
+                    color="#8696A9"
+                  />
+                </TouchableOpacity>
+                <Text style={styles.featureText}>
+                  {this.state.houseDataSource["street"]} ,{" "}
+                  {this.state.houseDataSource["postalCode"]} ,{" "}
+                  {this.state.houseDataSource["city"]}
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  flex: 0.5,
+                  paddingBottom: 20,
+                  borderBottomWidth: 1,
+                  borderColor: "#8696A9",
+                  marginLeft: moderateScale(19),
+                  marginRight: moderateScale(15),
+                  marginTop: moderateScale(15),
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.facilitiesTitle}>Description</Text>
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: "center",
+                      marginTop: moderateScale(10),
+                    }}
+                  >
+                    <Text style={styles.nameTitle}>
+                      {this.state.houseDataSource["name"]}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1, marginTop: moderateScale(10) }}>
+                    <Text style={styles.descriptionText}>
+                      {this.state.houseDataSource["description"]}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.5,
+                  paddingBottom: 20,
+                  borderBottomWidth: 1,
+                  borderColor: "#8696A9",
+                  marginLeft: moderateScale(19),
+                  marginRight: moderateScale(15),
+                  marginTop: moderateScale(15),
+                }}
+              >
+                <View style={{ flex: 0.5 }}>
+                  <Text style={styles.facilitiesTitle}>Facilities</Text>
+                  {this.renderFacilities(
+                    this.state.houseDataSource["propertyFeatures"]
+                  )}
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.5,
+                  paddingBottom: 20,
+                  borderBottomWidth: 1,
+                  borderColor: "#8696A9",
+                  marginLeft: moderateScale(19),
+                  marginRight: moderateScale(15),
+                  marginTop: moderateScale(15),
+                }}
+              >
+                <View style={{ flex: 0.5 }}>
+                  <Text style={styles.facilitiesTitle}>Owner</Text>
+                  {this.renderOwner()}
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.5,
+                  paddingBottom: 20,
+
+                  marginLeft: moderateScale(19),
+                  marginRight: moderateScale(15),
+                  marginTop: moderateScale(15),
+                }}
+              >
+                <View style={{ flex: 0.5 }}>
+                  <Text style={styles.facilitiesTitle}>Location</Text>
+                  <MapView
+                    initialRegion={{
+                      latitude: this.state.location["lat"],
+                      longitude: this.state.location["lng"],
+                      latitudeDelta: 0.00922,
+                      longitudeDelta: 0.00421,
+                    }}
+                    style={{
+                      width: width - moderateScale(35),
+                      height: moderateScale(200),
+                      marginTop: moderateScale(10),
+                    }}
+                    zoomEnabled={false}
+                    rotateEnabled={false}
+                    pitchEnabled={false}
+                  >
+                    <Marker
+                      coordinate={{
+                        latitude: this.state.location["lat"],
+                        longitude: this.state.location["lng"],
+                      }}
+                      pinColor={"purple"} // any color
+                      title={this.state.houseDataSource["name"]}
+                      description={this.state.houseDataSource["street"]}
+                    />
+                  </MapView>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
         </View>
       );
     }
@@ -765,6 +1193,32 @@ export default class Home extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  featureIcon: {},
+  facilitiesTitle: {
+    fontSize: moderateScale(18),
+    color: "#3D5775",
+    fontWeight: "600",
+    marginLeft: moderateScale(7),
+  },
+  nameTitle: {
+    fontSize: moderateScale(18),
+    color: "#3D5775",
+    fontWeight: "400",
+    marginLeft: moderateScale(7),
+  },
+  descriptionText: {
+    fontSize: moderateScale(15),
+    color: "#8696A9",
+    fontWeight: "400",
+    marginLeft: moderateScale(7),
+    textAlign: "justify",
+  },
+  featureText: {
+    fontSize: moderateScale(15),
+    color: "#8696A9",
+    fontWeight: "400",
+    marginLeft: moderateScale(7),
+  },
   bedroomButton: {
     flex: 0.1,
     height: "65%",
@@ -777,6 +1231,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
 
+    color: "white",
+  },
+  priceText: {
+    fontSize: moderateScale(25),
+    color: "white",
+    fontWeight: "500",
+  },
+  subPriceText: {
+    fontSize: moderateScale(25),
+    color: "white",
+    fontWeight: "100",
+  },
+  ratingText: {
+    fontSize: moderateScale(20),
     color: "white",
   },
   bedroomButtonActiveText: {
