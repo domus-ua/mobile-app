@@ -346,6 +346,7 @@ export default class Home extends React.Component {
     return (
       <HouseItem
         id={item.id}
+        locatarioId={this.state.userCode}
         photo={photo}
         name={item.name}
         price={item.price}

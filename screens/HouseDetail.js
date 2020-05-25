@@ -49,6 +49,7 @@ export default class Home extends React.Component {
       houseId: "",
       isLoading: true,
       userName: null,
+      favorite:false,
       userPassword: null,
       userToken: null,
       userCode: null,
@@ -135,6 +136,80 @@ export default class Home extends React.Component {
         },
       ],
     };
+  }
+
+  async removeFavorite() {
+    const { baseURL, userName, userPassword } = this.state;
+
+
+    // fetch data
+   
+    fetch(
+      baseURL +
+        "api/locatarios/wishlist",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          //change these params later
+          houseId: this.state.houseId,
+          locatarioId: this.state.userCode,
+          
+        })
+      }
+    )
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response;
+      })
+      .then((data) => {
+        console.log(data)
+        this.setState({
+          favorite: false,
+        });
+      })
+      .catch((error) => {
+        console.log("error: " + error);
+      });
+  }
+
+  async addFavorite() {
+    const { baseURL, userName, userPassword } = this.state;
+
+
+    // fetch data
+   
+    fetch(
+      baseURL +
+        "api/locatarios/wishlist",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          //change these params later
+          houseId: this.state.houseId,
+          locatarioId: this.state.userCode,
+          
+        })
+      }
+    )
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response;
+      })
+      .then((data) => {
+        console.log(data)
+        this.setState({
+          favorite: true,
+        });
+      })
+      .catch((error) => {
+        console.log("error: " + error);
+      });
   }
 
   async getLocation(address) {
@@ -575,77 +650,93 @@ export default class Home extends React.Component {
   fall = new Animated.Value(1);
 
   renderHeart() {
-    if (this.props.favorite) {
-      return (
-        <View
-          style={{
-            flex: 0.5,
-            alignItems: "flex-end",
-            justifyContent: "center",
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            }}
-          >
-            <TouchableOpacity
-              style={{ flex: 0.5, alignItems: "center" }}
-              onPress={() => {
-                //this.props.seguirRestaurante(this.props.codrestaurante, 0);
+    if (this.state.userCode == null){
+        return (
+            <View
+              style={{
+                flex: 0.5,
+                alignItems: "flex-end",
+                justifyContent: "center",
               }}
             >
-              <Ionicons
-                ios="md-heart-empty"
-                name="md-heart-empty"
-                size={moderateScale(40)}
-                style={{ color: theme.red }}
+              
+            </View>
+          );
+    }else {
+        if (this.state.favorite) {
+            return (
+              <View
+                style={{
+                  flex: 0.5,
+                  alignItems: "flex-end",
+                  justifyContent: "center",
+                }}
               >
-                {" "}
-              </Ionicons>
-            </TouchableOpacity>
-          </View>
-        </View>
-      );
-    } else {
-      return (
-        <View
-          style={{
-            flex: 0.5,
-            alignItems: "flex-end",
-            justifyContent: "center",
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            }}
-          >
-            <TouchableOpacity
-              style={{ flex: 0.5, alignItems: "center" }}
-              onPress={() => {
-                //this.props.seguirRestaurante(this.props.codrestaurante, 0);
-              }}
-            >
-              <Ionicons
-                ios="md-heart-empty"
-                name="md-heart-empty"
-                size={moderateScale(40)}
-                style={{ color: "white" }}
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{ flex: 0.5, alignItems: "center" }}
+                    onPress={() => {
+                      this.removeFavorite();
+                    }}
+                  >
+                    <Ionicons
+                      ios="md-heart"
+                      name="md-heart"
+                      size={moderateScale(40)}
+                      style={{ color: theme.red }}
+                    >
+                      {" "}
+                    </Ionicons>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          } else {
+            return (
+              <View
+                style={{
+                  flex: 0.5,
+                  alignItems: "flex-end",
+                  justifyContent: "center",
+                }}
               >
-                {" "}
-              </Ionicons>
-            </TouchableOpacity>
-          </View>
-        </View>
-      );
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{ flex: 0.5, alignItems: "center" }}
+                    onPress={() => {
+                      this.addFavorite();
+                    }}
+                  >
+                    <Ionicons
+                      ios="md-heart-empty"
+                      name="md-heart-empty"
+                      size={moderateScale(40)}
+                      style={{ color: "white" }}
+                    >
+                      {" "}
+                    </Ionicons>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          }
+
     }
+    
   }
 
   renderFacilitiesComponent = (facilities) => {
