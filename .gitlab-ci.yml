@@ -1,13 +1,15 @@
-image: node:latest
+image: node:alpine
 
 stages:
   - lint
   - test
-  - docker
+  - deploy
 
 cache:
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - ~/.cache/
+    - ~/.npm
+    - .jest
 
 lint:
   stage: lint
@@ -23,21 +25,9 @@ test:
     - npm ci 
     - npx jest --ci
 
-docker:
-  stage: docker
-  image: docker:stable
-  only:
-    - master
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: ""
-  services:
-    - name: docker:dind
-      entrypoint: ["env", "-u", "DOCKER_HOST"]
-      command: ["dockerd-entrypoint.sh"]
+deploy:
+  stage: deploy
   script:
-    - echo "Building and uploading Docker image 🐳"
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH .
-    - docker push $CI_REGISTRY/$CI_PROJECT_PATH
+    - apk add --no-cache bash
+    - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
+    - npx expo publish --non-interactive
