@@ -1,18 +1,22 @@
-image: node:latest
+image: node:alpine
 
 stages:
   - lint
   - test
-  - docker
+  - deploy
 
 cache:
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - ~/.cache/
+    - ~/.npm
+    - .jest
+
+before_script:
+  - npm ci
 
 lint:
   stage: lint
   script:
-    - npm ci
     - npm install eslint 
     - npm install eslint-plugin-react@latest
     - eslint --fix --max-warnings 20 src/ || echo "Skipping errors for now..."
@@ -20,24 +24,13 @@ lint:
 test:
   stage: test
   script:
-    - npm ci 
     - npx jest --ci
 
-docker:
-  stage: docker
-  image: docker:stable
-  only:
-    - master
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: ""
-  services:
-    - name: docker:dind
-      entrypoint: ["env", "-u", "DOCKER_HOST"]
-      command: ["dockerd-entrypoint.sh"]
+deploy:
+  stage: deploy
   script:
-    - echo "Building and uploading Docker image 🐳"
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH .
-    - docker push $CI_REGISTRY/$CI_PROJECT_PATH
+    - npm install expo-cli
+    - apk add --no-cache bash
+    - echo fs.inotify.max_user_watches=524288 | tee -a /etc/sysctl.conf && sysctl -p
+    - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
+    - npx expo publish --non-interactive
