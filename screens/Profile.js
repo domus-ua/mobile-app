@@ -25,11 +25,7 @@ import Animated from "react-native-reanimated";
 import {
   Ionicons,
   MaterialIcons,
-  MaterialCommunityIcons,
-  SimpleLineIcons,
-  Entypo,
-  FontAwesome,
-  Octicons,
+  AntDesign
 } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
 const { width, height } = Dimensions.get("screen");
@@ -626,7 +622,6 @@ export default class Home extends React.Component {
         </View>
       );
     } else {
-      
       if (this.state.userDataSource["user"]["photo"] == null) {
         photo =
           "http://192.168.160.60:3000/static/media/default-user.9d1403c3.png";
@@ -634,14 +629,110 @@ export default class Home extends React.Component {
         photo = this.state.houseDataSource["locador"]["user"]["photo"];
       }
 
-    
-
       return (
         <View style={{ flex: 1 }}>
           <OfflineNotice />
-          <View style={{flex:0.4,backgroundColor:"red"}}></View>
-          <View style={{flex:0.6,backgroundColor:"blue"}}></View>
+          <View style={{ flex: 0.4 }}>
+            <View
+              style={{
+                flex: 1,
+              }}
+            >
+              <ImageBackground
+                imageStyle={{ opacity: 0.9 }}
+                source={{
+                  uri:
+                    "http://192.168.160.60:3000/static/media/home.200c1988.jpg",
+                }}
+                style={{
+                  width: width,
+                  height: "100%",
+                }}
+              >
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: "space-between",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 0.7,
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                      marginBottom: moderateScale(10),
+                    }}
+                  >
+                    <Image
+                      source={{ uri: photo }}
+                      style={{
+                        width: moderateScale(100),
+                        height: moderateScale(100),
+                        borderRadius: moderateScale(50),
+                        backgroundColor: "white",
+                        marginHorizontal: 5,
+                      }}
+                    ></Image>
+                  </View>
+                  <View
+                    style={{
+                      flex: 0.3,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={styles.nameTitle}>
+                      {this.state.userDataSource["user"]["firstName"]}{" "}
+                      {this.state.userDataSource["user"]["lastName"]}
+                    </Text>
+                  </View>
+                </View>
+              </ImageBackground>
+            </View>
+          </View>
+          <View style={{ flex: 0.6,backgroundColor:"white" }}>
+            <View style={{ flex: 0.3,marginLeft: moderateScale(10), }}>
+              <View
+                style={{
+                  flex: 0.5,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  
+                }}
+              >
+                <Text style={styles.facilitiesTitle}>Email: </Text>
+                <Text style={styles.featureText}>{this.state.userDataSource["user"]["email"]} </Text>
 
+              </View>
+              <View
+                style={{
+                  flex: 0.5,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  
+                }}
+              >
+                <Text style={styles.facilitiesTitle}>Phone number: </Text>
+                <Text style={styles.featureText}>{this.state.userDataSource["user"]["phoneNumber"]} </Text>
+
+              </View>
+            </View>
+            <View style={{ flex: 0.7,justifyContent:"center",alignItems:"center" }}>
+            <TouchableOpacity
+              style={styles.filter}
+              onPress={() => console.log("Favorites")}
+            > 
+            <AntDesign
+              style={styles.featureIcon}
+              name="heart"
+              size={moderateScale(30)}
+              color="#FF6E6C"
+            />
+              <Text style={styles.filterText}>Wishlist</Text>
+            </TouchableOpacity>
+            </View>
+          </View>
         </View>
       );
     }
@@ -650,18 +741,18 @@ export default class Home extends React.Component {
 
 const styles = StyleSheet.create({
   featureIcon: {},
+  nameTitle: {
+    fontSize: moderateScale(20),
+    color: "white",
+    fontWeight: "600",
+  },
   facilitiesTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(20),
     color: "#3D5775",
     fontWeight: "600",
     marginLeft: moderateScale(7),
   },
-  nameTitle: {
-    fontSize: moderateScale(18),
-    color: "#3D5775",
-    fontWeight: "400",
-    marginLeft: moderateScale(7),
-  },
+
   descriptionText: {
     fontSize: moderateScale(15),
     color: "#8696A9",
@@ -670,7 +761,7 @@ const styles = StyleSheet.create({
     textAlign: "justify",
   },
   featureText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(18),
     color: "#8696A9",
     fontWeight: "400",
     marginLeft: moderateScale(7),
@@ -800,18 +891,17 @@ const styles = StyleSheet.create({
     shadowOffset: { height: 1, width: 1 }, // IOS
     shadowOpacity: 1, // IOS
     shadowRadius: 1, //IOS
-    elevation: 0, // TODO change elevation
-    width: moderateScale(105),
+    elevation: 4, // TODO change elevation
+    width: moderateScale(150),
     height: moderateScale(48),
-    right: "37%",
-    bottom: 20,
+   flexDirection:"row",
     borderRadius: 40,
-    position: "absolute",
     justifyContent: "center",
     alignItems: "center",
   },
   filterText: {
     color: "#F3F1FF",
+    marginLeft:10,
     fontSize: moderateScale(20),
   },
   squareView: {

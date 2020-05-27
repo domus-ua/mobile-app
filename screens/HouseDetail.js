@@ -49,7 +49,7 @@ export default class Home extends React.Component {
       houseId: "",
       isLoading: true,
       userName: null,
-      favorite:false,
+      favorite: false,
       userPassword: null,
       userToken: null,
       userCode: null,
@@ -141,31 +141,25 @@ export default class Home extends React.Component {
   async removeFavorite() {
     const { baseURL, userName, userPassword } = this.state;
 
-
     // fetch data
-   
-    fetch(
-      baseURL +
-        "api/locatarios/wishlist",
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          //change these params later
-          houseId: this.state.houseId,
-          locatarioId: this.state.userCode,
-          
-        })
-      }
-    )
+
+    fetch(baseURL + "api/locatarios/wishlist", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        //change these params later
+        houseId: this.state.houseId,
+        locatarioId: this.state.userCode,
+      }),
+    })
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
         else return response;
       })
       .then((data) => {
-        console.log(data)
+        console.log(data);
         this.setState({
           favorite: false,
         });
@@ -178,31 +172,25 @@ export default class Home extends React.Component {
   async addFavorite() {
     const { baseURL, userName, userPassword } = this.state;
 
-
     // fetch data
-   
-    fetch(
-      baseURL +
-        "api/locatarios/wishlist",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          //change these params later
-          houseId: this.state.houseId,
-          locatarioId: this.state.userCode,
-          
-        })
-      }
-    )
+
+    fetch(baseURL + "api/locatarios/wishlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        //change these params later
+        houseId: this.state.houseId,
+        locatarioId: this.state.userCode,
+      }),
+    })
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
         else return response;
       })
       .then((data) => {
-        console.log(data)
+        console.log(data);
         this.setState({
           favorite: true,
         });
@@ -650,93 +638,89 @@ export default class Home extends React.Component {
   fall = new Animated.Value(1);
 
   renderHeart() {
-    if (this.state.userCode == null){
+    if (this.state.userCode == null) {
+      return (
+        <View
+          style={{
+            flex: 0.5,
+            alignItems: "flex-end",
+            justifyContent: "center",
+          }}
+        ></View>
+      );
+    } else {
+      if (this.state.favorite) {
         return (
+          <View
+            style={{
+              flex: 0.5,
+              alignItems: "flex-end",
+              justifyContent: "center",
+            }}
+          >
             <View
               style={{
-                flex: 0.5,
-                alignItems: "flex-end",
-                justifyContent: "center",
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-end",
               }}
             >
-              
+              <TouchableOpacity
+                style={{ flex: 0.5, alignItems: "center" }}
+                onPress={() => {
+                  this.removeFavorite();
+                }}
+              >
+                <Ionicons
+                  ios="md-heart"
+                  name="md-heart"
+                  size={moderateScale(40)}
+                  style={{ color: theme.red }}
+                >
+                  {" "}
+                </Ionicons>
+              </TouchableOpacity>
             </View>
-          );
-    }else {
-        if (this.state.favorite) {
-            return (
-              <View
-                style={{
-                  flex: 0.5,
-                  alignItems: "flex-end",
-                  justifyContent: "center",
+          </View>
+        );
+      } else {
+        return (
+          <View
+            style={{
+              flex: 0.5,
+              alignItems: "flex-end",
+              justifyContent: "center",
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-end",
+              }}
+            >
+              <TouchableOpacity
+                style={{ flex: 0.5, alignItems: "center" }}
+                onPress={() => {
+                  this.addFavorite();
                 }}
               >
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                  }}
+                <Ionicons
+                  ios="md-heart-empty"
+                  name="md-heart-empty"
+                  size={moderateScale(40)}
+                  style={{ color: "white" }}
                 >
-                  <TouchableOpacity
-                    style={{ flex: 0.5, alignItems: "center" }}
-                    onPress={() => {
-                      this.removeFavorite();
-                    }}
-                  >
-                    <Ionicons
-                      ios="md-heart"
-                      name="md-heart"
-                      size={moderateScale(40)}
-                      style={{ color: theme.red }}
-                    >
-                      {" "}
-                    </Ionicons>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            );
-          } else {
-            return (
-              <View
-                style={{
-                  flex: 0.5,
-                  alignItems: "flex-end",
-                  justifyContent: "center",
-                }}
-              >
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <TouchableOpacity
-                    style={{ flex: 0.5, alignItems: "center" }}
-                    onPress={() => {
-                      this.addFavorite();
-                    }}
-                  >
-                    <Ionicons
-                      ios="md-heart-empty"
-                      name="md-heart-empty"
-                      size={moderateScale(40)}
-                      style={{ color: "white" }}
-                    >
-                      {" "}
-                    </Ionicons>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            );
-          }
-
+                  {" "}
+                </Ionicons>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+      }
     }
-    
   }
 
   renderFacilitiesComponent = (facilities) => {
@@ -1010,18 +994,14 @@ export default class Home extends React.Component {
         <View
           style={{
             flexDirection: "row",
-            justifyContent:"center",
+            justifyContent: "center",
             flex: 1,
             marginTop: moderateScale(10),
           }}
         >
-          
-            
-              <Text style={styles.featureText}>
-                You need an account to view the owner details!
-              </Text>
-            
-            
+          <Text style={styles.featureText}>
+            You need an account to view the owner details!
+          </Text>
         </View>
       );
     }
@@ -1030,10 +1010,14 @@ export default class Home extends React.Component {
   render() {
     if (this.state.isLoading) {
       return (
-        <ActivityIndicator
-          color={theme.primary_color}
-          size="large"
-        ></ActivityIndicator>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator
+            color={theme.primary_color}
+            size="large"
+          ></ActivityIndicator>
+        </View>
       );
     } else {
       if (this.state.houseDataSource.photos.length == 0) {
