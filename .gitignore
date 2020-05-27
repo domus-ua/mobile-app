@@ -104,3 +104,7 @@ RNTester/Pods/*
 
 # Android memory profiler files
 *.hprof
+
+# Expo
+.expo
+.expo-shared
