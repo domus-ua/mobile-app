@@ -27,6 +27,8 @@ import AuthLoadingScreen from "./components/auth/AuthLoadingScreen";
 import HeaderRightNavBar from "./components/HeaderRightNavBar";
 import theme from "./constants/theme.style.js";
 import HouseDetail from "./screens/HouseDetail";
+import Profile from "./screens/Profile";
+
 
 import Home from "./screens/Home";
 
@@ -144,7 +146,7 @@ const AppNavigator = createBottomTabNavigator(
     },
 
     Profile: {
-      screen: Home,
+      screen: Profile,
       navigationOptions: {
         tabBarLabel: "Profile",
         tabBarIcon: ({ tintColor }) => (
