@@ -25,11 +25,7 @@ import Animated from "react-native-reanimated";
 import {
   Ionicons,
   MaterialIcons,
-  MaterialCommunityIcons,
-  SimpleLineIcons,
-  Entypo,
-  FontAwesome,
-  Octicons,
+  AntDesign
 } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
 const { width, height } = Dimensions.get("screen");
@@ -61,179 +57,16 @@ export default class Home extends React.Component {
       location: null,
 
       refreshing: false,
-      houseDataSource: [
-        {
-          id: 1,
-          street: "Av. Lourenço Peixinho",
-          city: "Aveiro",
-          postalCode: "3800-006",
-          noRooms: 2,
-          noBathrooms: 1,
-          noGarages: 0,
-          habitableArea: 500,
-          available: true,
-          price: 230,
-          name: "Quarto c/ 2 quartos em Aveiro",
-          description: "Quarto c/ 2 quartos em Aveiro",
-          propertyFeatures: "WI-FI",
-          publishDay: "2020-05-18T12:39:04.733+0000",
-          photos: [],
-          locador: {
-            id: 1,
-            user: {
-              id: 1,
-              email: "locador@mail.com",
-              firstName: "Carlos",
-              lastName: "Santos",
-              phoneNumber: "965380346",
-              sex: "M",
-              photo: null,
-              dateJoined: "2020-05-18T12:38:54.840+0000",
-              lastLogin: "2020-05-21T13:11:38.716+0000",
-            },
-            role: "locador",
-            reviews: [],
-            verified: false,
-          },
-          reviewsReceived: [],
-          averageRating: 0,
-        },
-        {
-          id: 2,
-          street: "Av. Lourenço Peixinho",
-          city: "Aveiro",
-          postalCode: "3800-006",
-          noRooms: 3,
-          noBathrooms: 2,
-          noGarages: 1,
-          habitableArea: 500,
-          available: true,
-          price: 275,
-          name: "Quarto c/ 3 quartos em Aveiro",
-          description: "Quarto c/ 3 quartos em Aveiro",
-          propertyFeatures: "WI-FI, TV",
-          publishDay: "2020-05-18T12:39:15.411+0000",
-          photos: [],
-          locador: {
-            id: 1,
-            user: {
-              id: 1,
-              email: "locador@mail.com",
-              firstName: "Carlos",
-              lastName: "Santos",
-              phoneNumber: "965380346",
-              sex: "M",
-              photo: null,
-              dateJoined: "2020-05-18T12:38:54.840+0000",
-              lastLogin: "2020-05-21T13:11:38.716+0000",
-            },
-            role: "locador",
-            reviews: [],
-            verified: false,
-          },
-          reviewsReceived: [],
-          averageRating: 0,
-        },
-      ],
+      userDataSource: null,
     };
   }
 
-  async removeFavorite() {
-    const { baseURL, userName, userPassword } = this.state;
-
-    // fetch data
-
-    fetch(baseURL + "api/locatarios/wishlist", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        //change these params later
-        houseId: this.state.houseId,
-        locatarioId: this.state.userCode,
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error(response.status);
-        else return response;
-      })
-      .then((data) => {
-        console.log(data);
-        this.setState({
-          favorite: false,
-        });
-      })
-      .catch((error) => {
-        console.log("error: " + error);
-      });
-  }
-
-  async addFavorite() {
-    const { baseURL, userName, userPassword } = this.state;
-
-    // fetch data
-
-    fetch(baseURL + "api/locatarios/wishlist", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        //change these params later
-        houseId: this.state.houseId,
-        locatarioId: this.state.userCode,
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error(response.status);
-        else return response;
-      })
-      .then((data) => {
-        console.log(data);
-        this.setState({
-          favorite: true,
-        });
-      })
-      .catch((error) => {
-        console.log("error: " + error);
-      });
-  }
-
-  async getLocation(address) {
-    console.log(
-      "https://maps.google.com/maps/api/geocode/json?address=" +
-        address +
-        "&key=" +
-        this.state.googleAPI
-    );
-    fetch(
-      "https://maps.google.com/maps/api/geocode/json?address=" +
-        address +
-        "&key=" +
-        this.state.googleAPI
-    )
-      .then((response) => {
-        if (!response.ok) throw new Error(response.status);
-        else return response.json();
-      })
-
-      .then((res) => {
-        console.log(res["results"][0]["geometry"]);
-        this.setState({
-          location: res["results"][0]["geometry"]["location"],
-          isLoading: false,
-          refresh: false,
-        });
-      });
-  }
-
   async getInfo() {
-    const { baseURL, userName, userPassword, houseId } = this.state;
+    const { baseURL, userName, userPassword, houseId, userCode } = this.state;
 
     console.log(baseURL + "api/houses/" + houseId);
     // fetch data
-    fetch(baseURL + "api/houses/" + houseId, {
+    fetch(baseURL + "api/locatarios/" + userCode, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -246,10 +79,10 @@ export default class Home extends React.Component {
       .then((data) => {
         console.log(data);
         this.setState({
-          houseDataSource: data,
+          userDataSource: data,
+          isLoading: false,
+          refresh: false,
         });
-        console.log(data["street"]);
-        this.getLocation(data["street"]);
       })
       .catch((error) => {
         console.log("error: " + error);
@@ -295,11 +128,8 @@ export default class Home extends React.Component {
   };
 
   async componentDidMount() {
-    let id = this.props.navigation.getParam("id", null);
-    this.setState({ houseId: id });
     await this._retrieveData();
     if (this.state.SharedLoading == false) {
-      console.log(this.state.userCode);
       this.getInfo();
     }
   }
@@ -723,35 +553,6 @@ export default class Home extends React.Component {
     }
   }
 
-  renderFacilitiesComponent = (facilities) => {
-    var components = [];
-
-    for (index = 0; index < facilities.length; ++index) {
-      console.log(facilities[index]);
-      components.push(
-        <View
-          style={{
-            flex: 0.25,
-            flexDirection: "row",
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
-            marginLeft: moderateScale(10),
-            marginTop: moderateScale(5),
-          }}
-        >
-          <FontAwesome
-            style={styles.featureIcon}
-            name="square"
-            size={moderateScale(20)}
-            color="#8696A9"
-          />
-          <Text style={styles.featureText}>{facilities[index]}</Text>
-        </View>
-      );
-    }
-    return components;
-  };
-
   renderFacilities = (facilities) => {
     if (facilities.length != 0) {
       facilitiesArray = facilities.split(";");
@@ -808,205 +609,6 @@ export default class Home extends React.Component {
     Linking.openURL(phoneNumber);
   };
 
-  renderHousePhotos = (photos) => {
-    var images = [];
-    for (index = 0; index < photos.length; ++index) {
-      console.log(photos[index]);
-      images.push(
-        <View
-          style={{
-            flex: 1,
-          }}
-          key={index}
-        >
-          <ImageBackground
-            imageStyle={{ opacity: 0.9 }}
-            source={{ uri: photos[index] }}
-            style={{
-              width: width,
-              height: "100%",
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "space-between",
-                backgroundColor: "rgba(0,0,0,0.5)",
-              }}
-            >
-              <View
-                style={{
-                  flex: 0.15,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <View
-                  style={{
-                    flex: 1,
-                    alignItems: "flex-start",
-                    color: "white",
-                    marginLeft: moderateScale(15),
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => {
-                      this.props.navigation.goBack(null);
-                    }}
-                  >
-                    <Ionicons
-                      color="white"
-                      name="md-arrow-back"
-                      size={moderateScale(28)}
-                    ></Ionicons>
-                  </TouchableOpacity>
-                </View>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    //justifyContent: "flex-end",
-                    marginRight: moderateScale(15),
-                  }}
-                >
-                  {this.renderHeart()}
-                  <View style={{ flex: 0.5 }}>
-                    <View
-                      style={{
-                        flex: 0.2,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <Text style={styles.ratingText}>
-                        {this.state.houseDataSource["averageRating"]}{" "}
-                      </Text>
-                      <Ionicons
-                        name="ios-star"
-                        size={moderateScale(30)}
-                        style={{ color: "#f2b01e" }}
-                      ></Ionicons>
-                    </View>
-                  </View>
-                </View>
-              </View>
-              <View style={{ flex: 0.7 }}></View>
-              <View
-                style={{
-                  flex: 0.15,
-                  alignItems: "center",
-                  marginLeft: moderateScale(15),
-                  flexDirection: "row",
-                }}
-              >
-                <Text style={styles.priceText}>
-                  {this.state.houseDataSource["price"]} €
-                </Text>
-                <Text style={styles.subPriceText}> per month</Text>
-              </View>
-            </View>
-          </ImageBackground>
-        </View>
-      );
-    }
-    return images;
-  };
-
-  renderVerified = () => {
-    if (this.state.houseDataSource.locador.verified) {
-      return (
-        <View
-          style={{
-            flex: 0.4,
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <Octicons
-            style={styles.featureIcon}
-            name="verified"
-            size={moderateScale(20)}
-            color="green"
-          />
-          <Text style={styles.featureText}>Verified by ©Domus</Text>
-        </View>
-      );
-    } else {
-      return null;
-    }
-  };
-
-  renderOwner = () => {
-    if (this.state.userCode != null) {
-      return (
-        <View
-          style={{
-            flexDirection: "row",
-            flex: 1,
-            marginTop: moderateScale(10),
-          }}
-        >
-          <View
-            style={{
-              flex: 0.2,
-              alignItems: "center",
-            }}
-          >
-            <Image
-              source={{ uri: locadorPhoto }}
-              style={{
-                width: moderateScale(50),
-                height: moderateScale(50),
-                borderRadius: moderateScale(30),
-                marginHorizontal: 5,
-              }}
-            ></Image>
-          </View>
-          <View style={{ flex: 0.4 }}>
-            <View style={{ flex: 0.5 }}>
-              <Text style={styles.facilitiesTitle}>
-                {this.state.houseDataSource["locador"]["user"]["firstName"]}{" "}
-                {this.state.houseDataSource["locador"]["user"]["lastName"]}
-              </Text>
-            </View>
-            <View style={{ flex: 0.5 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  this.dialCall(
-                    this.state.houseDataSource["locador"]["user"]["phoneNumber"]
-                  );
-                }}
-              >
-                <Text style={styles.featureText}>
-                  {this.state.houseDataSource["locador"]["user"]["phoneNumber"]}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          {this.renderVerified()}
-        </View>
-      );
-    } else {
-      return (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            flex: 1,
-            marginTop: moderateScale(10),
-          }}
-        >
-          <Text style={styles.featureText}>
-            You need an account to view the owner details!
-          </Text>
-        </View>
-      );
-    }
-  };
-
   render() {
     if (this.state.isLoading) {
       return (
@@ -1020,246 +622,116 @@ export default class Home extends React.Component {
         </View>
       );
     } else {
-      if (this.state.houseDataSource.photos.length == 0) {
-        photos = ["http://192.168.160.60:3000/static/media/home.200c1988.jpg"];
-      } else {
-        photos = this.state.houseDataSource.photos;
-      }
-      if (this.state.houseDataSource["locador"]["user"]["photo"] == null) {
-        locadorPhoto =
+      if (this.state.userDataSource["user"]["photo"] == null) {
+        photo =
           "http://192.168.160.60:3000/static/media/default-user.9d1403c3.png";
       } else {
-        locadorPhoto = this.state.houseDataSource["locador"]["user"]["photo"];
+        photo = this.state.houseDataSource["locador"]["user"]["photo"];
       }
-
-      console.log(this.state.location["lat"]);
-      var markers = [
-        {
-          latitude: this.state.location["lat"],
-          longitude: this.state.location["lng"],
-          title: "House",
-          subtitle: this.state.houseDataSource["street"],
-        },
-      ];
 
       return (
         <View style={{ flex: 1 }}>
           <OfflineNotice />
-          <ScrollView
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            pagingEnabled={true}
-            showsHorizontalScrollIndicator={true}
-            style={{ flex: 0.1, marginTop: 28 }}
-          >
-            {this.renderHousePhotos(photos)}
-          </ScrollView>
-          <View style={{ flex: 0.9 }}>
-            <ScrollView style={{ flex: 1 }}>
-              <View
+          <View style={{ flex: 0.4 }}>
+            <View
+              style={{
+                flex: 1,
+              }}
+            >
+              <ImageBackground
+                imageStyle={{ opacity: 0.9 }}
+                source={{
+                  uri:
+                    "http://192.168.160.60:3000/static/media/home.200c1988.jpg",
+                }}
                 style={{
-                  flex: 0.33,
-                  flexDirection: "row",
-                  justifyContent: "space-around",
-                  marginHorizontal: 10,
-                  marginTop: moderateScale(15),
+                  width: width,
+                  height: "100%",
                 }}
               >
                 <View
                   style={{
-                    flex: 0.36,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    flex: 1,
+                    justifyContent: "space-between",
+                    backgroundColor: "rgba(0,0,0,0.5)",
                   }}
                 >
-                  <TouchableOpacity>
-                    <Ionicons
-                      style={styles.featureIcon}
-                      name="ios-bed"
-                      size={moderateScale(25)}
-                      color="#8696A9"
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.featureText}>
-                    {this.state.houseDataSource["noRooms"]} Bedroom
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flex: 0.36,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <TouchableOpacity>
-                    <MaterialCommunityIcons
-                      style={styles.featureIcon}
-                      name="shower"
-                      size={moderateScale(25)}
-                      color="#8696A9"
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.featureText}>
-                    {this.state.houseDataSource["noBathrooms"]} Bathroom
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flex: 0.25,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginLeft: moderateScale(10),
-                  }}
-                >
-                  <TouchableOpacity>
-                    <SimpleLineIcons
-                      style={styles.featureIcon}
-                      name="size-fullscreen"
-                      size={moderateScale(20)}
-                      color="#8696A9"
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.featureText}>
-                    {this.state.houseDataSource["habitableArea"]} m2
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={{
-                  flex: 0.5,
-                  flexDirection: "row",
-                  paddingBottom: 20,
-                  borderBottomWidth: 1,
-                  borderColor: "#8696A9",
-                  marginLeft: moderateScale(19),
-                  marginRight: moderateScale(15),
-                  marginTop: moderateScale(15),
-                }}
-              >
-                <TouchableOpacity>
-                  <Entypo
-                    style={styles.featureIcon}
-                    name="location"
-                    size={moderateScale(20)}
-                    color="#8696A9"
-                  />
-                </TouchableOpacity>
-                <Text style={styles.featureText}>
-                  {this.state.houseDataSource["street"]} ,{" "}
-                  {this.state.houseDataSource["postalCode"]} ,{" "}
-                  {this.state.houseDataSource["city"]}
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  flex: 0.5,
-                  paddingBottom: 20,
-                  borderBottomWidth: 1,
-                  borderColor: "#8696A9",
-                  marginLeft: moderateScale(19),
-                  marginRight: moderateScale(15),
-                  marginTop: moderateScale(15),
-                }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.facilitiesTitle}>Description</Text>
                   <View
                     style={{
-                      flex: 1,
+                      flex: 0.7,
+                      justifyContent: "flex-end",
                       alignItems: "center",
-                      marginTop: moderateScale(10),
+                      marginBottom: moderateScale(10),
+                    }}
+                  >
+                    <Image
+                      source={{ uri: photo }}
+                      style={{
+                        width: moderateScale(100),
+                        height: moderateScale(100),
+                        borderRadius: moderateScale(50),
+                        backgroundColor: "white",
+                        marginHorizontal: 5,
+                      }}
+                    ></Image>
+                  </View>
+                  <View
+                    style={{
+                      flex: 0.3,
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
                     <Text style={styles.nameTitle}>
-                      {this.state.houseDataSource["name"]}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1, marginTop: moderateScale(10) }}>
-                    <Text style={styles.descriptionText}>
-                      {this.state.houseDataSource["description"]}
+                      {this.state.userDataSource["user"]["firstName"]}{" "}
+                      {this.state.userDataSource["user"]["lastName"]}
                     </Text>
                   </View>
                 </View>
-              </View>
+              </ImageBackground>
+            </View>
+          </View>
+          <View style={{ flex: 0.6,backgroundColor:"white" }}>
+            <View style={{ flex: 0.3,marginLeft: moderateScale(10), }}>
               <View
                 style={{
                   flex: 0.5,
-                  paddingBottom: 20,
-                  borderBottomWidth: 1,
-                  borderColor: "#8696A9",
-                  marginLeft: moderateScale(19),
-                  marginRight: moderateScale(15),
-                  marginTop: moderateScale(15),
+                  flexDirection: "row",
+                  alignItems: "center",
+                  
                 }}
               >
-                <View style={{ flex: 0.5 }}>
-                  <Text style={styles.facilitiesTitle}>Facilities</Text>
-                  {this.renderFacilities(
-                    this.state.houseDataSource["propertyFeatures"]
-                  )}
-                </View>
-              </View>
-              <View
-                style={{
-                  flex: 0.5,
-                  paddingBottom: 20,
-                  borderBottomWidth: 1,
-                  borderColor: "#8696A9",
-                  marginLeft: moderateScale(19),
-                  marginRight: moderateScale(15),
-                  marginTop: moderateScale(15),
-                }}
-              >
-                <View style={{ flex: 0.5 }}>
-                  <Text style={styles.facilitiesTitle}>Owner</Text>
-                  {this.renderOwner()}
-                </View>
-              </View>
-              <View
-                style={{
-                  flex: 0.5,
-                  paddingBottom: 20,
+                <Text style={styles.facilitiesTitle}>Email: </Text>
+                <Text style={styles.featureText}>{this.state.userDataSource["user"]["email"]} </Text>
 
-                  marginLeft: moderateScale(19),
-                  marginRight: moderateScale(15),
-                  marginTop: moderateScale(15),
+              </View>
+              <View
+                style={{
+                  flex: 0.5,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  
                 }}
               >
-                <View style={{ flex: 0.5 }}>
-                  <Text style={styles.facilitiesTitle}>Location</Text>
-                  <MapView
-                    initialRegion={{
-                      latitude: this.state.location["lat"],
-                      longitude: this.state.location["lng"],
-                      latitudeDelta: 0.00922,
-                      longitudeDelta: 0.00421,
-                    }}
-                    style={{
-                      width: width - moderateScale(35),
-                      height: moderateScale(200),
-                      marginTop: moderateScale(10),
-                    }}
-                    zoomEnabled={false}
-                    rotateEnabled={false}
-                    pitchEnabled={false}
-                  >
-                    <Marker
-                      coordinate={{
-                        latitude: this.state.location["lat"],
-                        longitude: this.state.location["lng"],
-                      }}
-                      pinColor={"purple"} // any color
-                      title={this.state.houseDataSource["name"]}
-                      description={this.state.houseDataSource["street"]}
-                    />
-                  </MapView>
-                </View>
+                <Text style={styles.facilitiesTitle}>Phone number: </Text>
+                <Text style={styles.featureText}>{this.state.userDataSource["user"]["phoneNumber"]} </Text>
+
               </View>
-            </ScrollView>
+            </View>
+            <View style={{ flex: 0.7,justifyContent:"center",alignItems:"center" }}>
+            <TouchableOpacity
+              style={styles.filter}
+              onPress={() => console.log("Favorites")}
+            > 
+            <AntDesign
+              style={styles.featureIcon}
+              name="heart"
+              size={moderateScale(30)}
+              color="#FF6E6C"
+            />
+              <Text style={styles.filterText}>Wishlist</Text>
+            </TouchableOpacity>
+            </View>
           </View>
         </View>
       );
@@ -1269,18 +741,18 @@ export default class Home extends React.Component {
 
 const styles = StyleSheet.create({
   featureIcon: {},
+  nameTitle: {
+    fontSize: moderateScale(20),
+    color: "white",
+    fontWeight: "600",
+  },
   facilitiesTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(20),
     color: "#3D5775",
     fontWeight: "600",
     marginLeft: moderateScale(7),
   },
-  nameTitle: {
-    fontSize: moderateScale(18),
-    color: "#3D5775",
-    fontWeight: "400",
-    marginLeft: moderateScale(7),
-  },
+
   descriptionText: {
     fontSize: moderateScale(15),
     color: "#8696A9",
@@ -1289,7 +761,7 @@ const styles = StyleSheet.create({
     textAlign: "justify",
   },
   featureText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(18),
     color: "#8696A9",
     fontWeight: "400",
     marginLeft: moderateScale(7),
@@ -1419,18 +891,17 @@ const styles = StyleSheet.create({
     shadowOffset: { height: 1, width: 1 }, // IOS
     shadowOpacity: 1, // IOS
     shadowRadius: 1, //IOS
-    elevation: 0, // TODO change elevation
-    width: moderateScale(105),
+    elevation: 4, // TODO change elevation
+    width: moderateScale(150),
     height: moderateScale(48),
-    right: "37%",
-    bottom: 20,
+   flexDirection:"row",
     borderRadius: 40,
-    position: "absolute",
     justifyContent: "center",
     alignItems: "center",
   },
   filterText: {
     color: "#F3F1FF",
+    marginLeft:10,
     fontSize: moderateScale(20),
   },
   squareView: {
