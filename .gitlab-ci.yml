@@ -29,5 +29,6 @@ deploy:
   stage: deploy
   script:
     - apk add --no-cache bash
+    - npm install expo-cli
     - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
     - npx expo publish --non-interactive
