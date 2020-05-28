@@ -219,12 +219,20 @@ export default class Home extends React.Component {
       })
 
       .then((res) => {
-        console.log(res["results"][0]["geometry"]);
-        this.setState({
-          location: res["results"][0]["geometry"]["location"],
-          isLoading: false,
-          refresh: false,
-        });
+        if (res["results"].length!=0) {
+          this.setState({
+            location: res["results"][0]["geometry"]["location"],
+            isLoading: false,
+            refresh: false,
+            showLocation: true,
+          });
+        } else {
+          this.setState({
+            showLocation: false,
+            isLoading: false,
+            refresh: false,
+          });
+        }
       });
   }
 
@@ -296,7 +304,9 @@ export default class Home extends React.Component {
 
   async componentDidMount() {
     let id = this.props.navigation.getParam("id", null);
-    this.setState({ houseId: id });
+    let favorite = this.props.navigation.getParam("favorite", false);
+
+    this.setState({ houseId: id, favorite: favorite });
     await this._retrieveData();
     if (this.state.SharedLoading == false) {
       console.log(this.state.userCode);
@@ -649,6 +659,7 @@ export default class Home extends React.Component {
         ></View>
       );
     } else {
+      console.log("Favorite: " + this.state.favorite);
       if (this.state.favorite) {
         return (
           <View
@@ -821,7 +832,7 @@ export default class Home extends React.Component {
         >
           <ImageBackground
             imageStyle={{ opacity: 0.9 }}
-            source={{ uri: photos[index] }}
+            source={{ uri: "data:image/jpeg;base64," + photos[index] }}
             style={{
               width: width,
               height: "100%",
@@ -939,6 +950,54 @@ export default class Home extends React.Component {
     }
   };
 
+  renderLocation = () => {
+    if (this.state.showLocation) {
+      return (
+        <MapView
+          initialRegion={{
+            latitude: this.state.location["lat"],
+            longitude: this.state.location["lng"],
+            latitudeDelta: 0.00922,
+            longitudeDelta: 0.00421,
+          }}
+          style={{
+            width: width - moderateScale(35),
+            height: moderateScale(200),
+            marginTop: moderateScale(10),
+          }}
+          zoomEnabled={false}
+          rotateEnabled={false}
+          pitchEnabled={false}
+        >
+          <Marker
+            coordinate={{
+              latitude: this.state.location["lat"],
+              longitude: this.state.location["lng"],
+            }}
+            pinColor={"purple"} // any color
+            title={this.state.houseDataSource["name"]}
+            description={this.state.houseDataSource["street"]}
+          />
+        </MapView>
+      );
+    } else {
+      return (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            flex: 1,
+            marginTop: moderateScale(10),
+          }}
+        >
+          <Text style={styles.featureText}>
+            Unable to get location at this moment!
+          </Text>
+        </View>
+      );
+    }
+  };
+
   renderOwner = () => {
     if (this.state.userCode != null) {
       return (
@@ -956,7 +1015,7 @@ export default class Home extends React.Component {
             }}
           >
             <Image
-              source={{ uri: locadorPhoto }}
+              source={{ uri: "data:image/jpeg;base64," + locadorPhoto }}
               style={{
                 width: moderateScale(50),
                 height: moderateScale(50),
@@ -1032,15 +1091,7 @@ export default class Home extends React.Component {
         locadorPhoto = this.state.houseDataSource["locador"]["user"]["photo"];
       }
 
-      console.log(this.state.location["lat"]);
-      var markers = [
-        {
-          latitude: this.state.location["lat"],
-          longitude: this.state.location["lng"],
-          title: "House",
-          subtitle: this.state.houseDataSource["street"],
-        },
-      ];
+     
 
       return (
         <View style={{ flex: 1 }}>
@@ -1231,32 +1282,7 @@ export default class Home extends React.Component {
               >
                 <View style={{ flex: 0.5 }}>
                   <Text style={styles.facilitiesTitle}>Location</Text>
-                  <MapView
-                    initialRegion={{
-                      latitude: this.state.location["lat"],
-                      longitude: this.state.location["lng"],
-                      latitudeDelta: 0.00922,
-                      longitudeDelta: 0.00421,
-                    }}
-                    style={{
-                      width: width - moderateScale(35),
-                      height: moderateScale(200),
-                      marginTop: moderateScale(10),
-                    }}
-                    zoomEnabled={false}
-                    rotateEnabled={false}
-                    pitchEnabled={false}
-                  >
-                    <Marker
-                      coordinate={{
-                        latitude: this.state.location["lat"],
-                        longitude: this.state.location["lng"],
-                      }}
-                      pinColor={"purple"} // any color
-                      title={this.state.houseDataSource["name"]}
-                      description={this.state.houseDataSource["street"]}
-                    />
-                  </MapView>
+                  {this.renderLocation()}
                 </View>
               </View>
             </ScrollView>

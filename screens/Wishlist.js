@@ -24,7 +24,8 @@ import { moderateScale } from "react-native-size-matters";
 const { width, height } = Dimensions.get("screen");
 import theme from "../constants/theme.style.js";
 import OfflineNotice from "../components/OfflineNotice";
-import HouseItem from "../components/HouseItem";
+import HouseItem from "../components/HouseItemWishlist";
+import { NavigationEvents } from "react-navigation";
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -54,107 +55,53 @@ export default class Home extends React.Component {
       baseURL: "http://192.168.160.60:8080/",
 
       refreshing: false,
-      houseDataSource: [
-      
-      ],
+      houseDataSource: [],
     };
   }
-
   async getInfo() {
-    const { baseURL, userName, userPassword } = this.state;
+    const { baseURL, userName, userPassword, houseId, userCode } = this.state;
 
-    login_info = "Basic " + Base64.btoa(userName + ":" + userPassword);
-    city_string = "";
-    minPrice_string = "";
-    maxPrice_string = "";
-    bedroom_string = "";
-    orderBy_string = "";
-    if (this.state.displaySearchString != "") {
-      city_string = "city=" + this.state.displaySearchString;
-    }
-
-    if (this.state.minPrice != "") {
-      minPrice_string = "minPrice=" + this.state.minPrice;
-    }
-
-    if (this.state.maxPrice != "") {
-      maxPrice_string = "maxPrice=" + this.state.maxPrice;
-    }
-
-    if (this.state.bedroomNo1) {
-      bedroom_string = "nRooms=1";
-    }
-
-    if (this.state.bedroomNo2) {
-      bedroom_string = "nRooms=2";
-    }
-
-    if (this.state.bedroomNo3) {
-      bedroom_string = "nRooms=3";
-    }
-
-    if (this.state.bedroomNo4) {
-      bedroom_string = "nRooms=4";
-    }
-
-    if (this.state.bedroomNo5) {
-      bedroom_string = "nRooms=5";
-    }
-
-    if (this.state.higherRating) {
-      orderBy_string = "desc=true&orderAttribute=rating";
-    }
-
-    if (this.state.lowerRating) {
-      orderBy_string = "desc=false&orderAttribute=rating";
-    }
-
-    if (this.state.higherPrice) {
-      orderBy_string = "desc=true&orderAttribute=price";
-    }
-
-    if (this.state.lowerPrice) {
-      orderBy_string = "desc=false&orderAttribute=price";
-    }
-
-    console.log(
-      baseURL +
-        "api/houses?" +
-        city_string +
-        "&" +
-        minPrice_string +
-        "&" +
-        maxPrice_string +
-        "&" +
-        bedroom_string +
-        "&" +
-        orderBy_string
-    );
+    console.log(baseURL + "api/locatarios/wishlist/" + userCode);
     // fetch data
-    fetch(
-      baseURL +
-        "api/houses?" +
-        city_string +
-        "&" +
-        minPrice_string +
-        "&" +
-        maxPrice_string +
-        "&" +
-        bedroom_string +
-        "&" +
-        orderBy_string,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    fetch(baseURL + "api/locatarios/wishlist/" + userCode, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
         else return response.json();
       })
       .then((data) => {
+        console.log(data);
+        this.setState({
+          houseDataSource: data,
+        });
+        console.log(data["street"]);
+      })
+      .catch((error) => {
+        console.log("error: " + error);
+      });
+  }
+
+  async getInfo() {
+    const { baseURL, userName, userPassword, houseId, userCode } = this.state;
+
+    console.log(baseURL + "api/locatarios/wishlist/" + userCode);
+    // fetch data
+    fetch(baseURL + "api/locatarios/wishlist/" + userCode, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response.json();
+      })
+      .then((data) => {
+        console.log(data);
         this.setState({
           houseDataSource: data,
           isLoading: false,
@@ -181,10 +128,9 @@ export default class Home extends React.Component {
           userPassword: userPassword,
           userCode: value,
         });
-      }else{
+      } else {
         this.setState({
           SharedLoading: false,
-          
         });
       }
     } catch (error) {
@@ -206,7 +152,6 @@ export default class Home extends React.Component {
   };
 
   async componentDidMount() {
-    console.log(width);
     await this._retrieveData();
     if (this.state.SharedLoading == false) {
       console.log(this.state.userCode);
@@ -227,7 +172,7 @@ export default class Home extends React.Component {
         }}
       >
         <Text style={{ fontSize: 20, textAlign: "center", color: theme.black }}>
-          There are no houses with the current filters 😔
+          There are no houses in your wishlist 😔
         </Text>
       </View>
     );
@@ -284,7 +229,8 @@ export default class Home extends React.Component {
         area={item.habitableArea}
         city={item.city}
         rating={item.averageRating}
-        favorite={false}
+        favorite={true}
+        refresh={this.handleRefresh}
       />
     );
   };
@@ -555,140 +501,62 @@ export default class Home extends React.Component {
       return (
         <View style={{ flex: 1 }}>
           <OfflineNotice />
-          <Animated.View
-            style={{
-              flex: 1,
-              marginTop: 30,
-              opacity: Animated.add(0.1, Animated.multiply(this.fall, 0.9)),
-            }}
-          >
-            <View style={{ flex: 0.2 }}>
-              <View style={styles.searchSection}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Find a Room in"
-                  testID="citySearch"
-                  onChangeText={(searchString) => {
-                    this.setState({ searchString });
-                  }}
-                  underlineColorAndroid="transparent"
-                />
-                <TouchableOpacity
-                  onPress={() => this.searchCity()}
-                  testID="citySearchButton"
-                >
-                  <Ionicons
-                    style={styles.searchIcon}
-                    name="md-search"
-                    size={moderateScale(25)}
-                    color="black"
-                  />
-                </TouchableOpacity>
-              </View>
-              {this.renderCitytext()}
-            </View>
-            <View style={{ flex: 0.8, justifyContent: "center" }}>
-              <ActivityIndicator size="large" color={theme.secondary} />
-            </View>
-          </Animated.View>
-          <LinearGradient
-            colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 0.1 * height,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity
-              style={styles.filter}
-              onPress={() => this.bs.current.snapTo(1)}
-            >
-              <Text style={styles.filterText}>Filter</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <BottomSheet
-            ref={this.bs}
-            renderContent={this.renderInner}
-            renderHeader={this.renderHeader}
-            snapPoints={[0, 500]}
-            initialSnap={0}
-            callbackNode={this.fall}
-            enabledInnerScrolling={false}
-            enabledContentTapInteraction={false}
-          />
+
+          <View style={{ flex: 1, justifyContent: "center" }}>
+            <ActivityIndicator size="large" color={theme.secondary} />
+          </View>
         </View>
       );
     } else {
       return (
         <View style={{ flex: 1 }}>
           <OfflineNotice />
-          <Animated.View
+          <View
             style={{
               flex: 1,
               marginTop: 30,
-              opacity: Animated.add(0.1, Animated.multiply(this.fall, 0.9)),
             }}
           >
-            <View style={{ flex: 0.2, zIndex: 1 }}>
-              <View style={styles.searchSection}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Find a Room in"
-                  testID="citySearch"
-                  onChangeText={(searchString) => {
-                    this.setState({ searchString });
-                  }}
-                  underlineColorAndroid="transparent"
-                />
+            <View
+              style={{
+                flex: 0.1,
+                flexDirection: "row",
+                marginLeft: moderateScale(15),
+                marginTop: moderateScale(20),
+              }}
+            >
+              <View
+                style={{ flex: 1, alignItems: "flex-start", color: "white" }}
+              >
                 <TouchableOpacity
-                  onPress={() => this.searchCity()}
-                  testID="citySearchButton"
+                  onPress={() => {
+                    this.props.navigation.goBack(null);
+                  }}
                 >
                   <Ionicons
-                    style={styles.searchIcon}
-                    name="md-search"
-                    size={moderateScale(25)}
-                    color="black"
-                  />
+                    color="#0D2D53"
+                    name="md-arrow-back"
+                    size={moderateScale(28)}
+                  ></Ionicons>
                 </TouchableOpacity>
               </View>
-              {this.renderCitytext()}
+
+              <Text
+                style={{
+                  flex: 4,
+                  fontSize: moderateScale(22),
+                  color: "#0D2D53",
+                  fontWeight: "500",
+                  alignItems: "center",
+                }}
+              >
+                Wishlist
+              </Text>
             </View>
-            <View style={{ flex: 0.8 }}>{this.renderList()}</View>
-          </Animated.View>
-          <LinearGradient
-            colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 0.1 * height,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity
-              style={styles.filter}
-              onPress={() => this.bs.current.snapTo(1)}
-            >
-              <Text style={styles.filterText}>Filter</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <BottomSheet
-            ref={this.bs}
-            renderContent={this.renderInner}
-            renderHeader={this.renderHeader}
-            snapPoints={[0, 500]}
-            initialSnap={0}
-            callbackNode={this.fall}
-            enabledInnerScrolling={false}
-            enabledContentTapInteraction={false}
-          />
+            <View style={{ flex: 0.9 }}>{this.renderList()}</View>
+          </View>
+          <NavigationEvents onDidFocus={() => this.handleRefresh()} />
+
         </View>
       );
     }

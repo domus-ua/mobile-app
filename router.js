@@ -28,6 +28,8 @@ import HeaderRightNavBar from "./components/HeaderRightNavBar";
 import theme from "./constants/theme.style.js";
 import HouseDetail from "./screens/HouseDetail";
 import Profile from "./screens/Profile";
+import Wishlist from "./screens/Wishlist";
+
 
 
 import Home from "./screens/Home";
@@ -98,6 +100,30 @@ const HouseStack = createStackNavigator(
   }
 );
 
+const ProfileStack = createStackNavigator(
+  //SignedOut Stack
+  {
+    //Defination of Navigaton from home screen
+    Profile: {
+      screen: Profile,
+    },
+    Wishlist: {
+      screen: Wishlist,
+    },
+    HouseDetail: {
+      screen: HouseDetail,
+    },
+  },
+  {
+    //For React Navigation 2.+ change defaultNavigationOptions->navigationOptions
+    defaultNavigationOptions: {
+      //Header customization of the perticular Screen
+
+      header: null,
+    },
+  }
+);
+
 const AppNavigatorNoLogin = createBottomTabNavigator(
   //Signed In Stack
   {
@@ -146,7 +172,7 @@ const AppNavigator = createBottomTabNavigator(
     },
 
     Profile: {
-      screen: Profile,
+      screen: ProfileStack,
       navigationOptions: {
         tabBarLabel: "Profile",
         tabBarIcon: ({ tintColor }) => (
