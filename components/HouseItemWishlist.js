@@ -25,7 +25,7 @@ import {
   SimpleLineIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import NavigationService from "../components/NavigationService";
+import NavigationService from "./NavigationService";
 
 import { ScrollView, FlatList } from "react-native-gesture-handler";
 import themeStyle from "../constants/theme.style.js";
@@ -88,7 +88,7 @@ export default class Register extends React.Component {
   }
 
   renderHeart() {
-    console.log("Favorite: "+this.state.favorite)
+    console.log("Favorite: " + this.state.favorite);
     if (this.props.locatarioId == null) {
       return (
         <View
@@ -97,9 +97,7 @@ export default class Register extends React.Component {
             alignItems: "flex-end",
             justifyContent: "center",
           }}
-        >
-          
-        </View>
+        ></View>
       );
     } else {
       if (this.state.favorite) {
@@ -195,6 +193,7 @@ export default class Register extends React.Component {
         this.setState({
           favorite: false,
         });
+        this.props.refresh();
       })
       .catch((error) => {
         console.log("error: " + error);
@@ -226,6 +225,7 @@ export default class Register extends React.Component {
         this.setState({
           favorite: true,
         });
+        this.props.refresh();
       })
       .catch((error) => {
         console.log("error: " + error);
@@ -271,7 +271,10 @@ export default class Register extends React.Component {
                 borderRadius: 12,
               }}
               onPress={() =>
-                NavigationService.navigate("HouseDetail", { id: this.props.id,favorite:this.state.favorite })
+                NavigationService.navigate("HouseDetail", {
+                  id: this.props.id,
+                  favorite: this.state.favorite,
+                })
               }
             >
               {this.renderHeart()}

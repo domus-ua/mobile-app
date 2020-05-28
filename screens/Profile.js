@@ -22,11 +22,7 @@ import {
   Linking,
 } from "react-native";
 import Animated from "react-native-reanimated";
-import {
-  Ionicons,
-  MaterialIcons,
-  AntDesign
-} from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { moderateScale } from "react-native-size-matters";
 const { width, height } = Dimensions.get("screen");
 import theme from "../constants/theme.style.js";
@@ -609,6 +605,18 @@ export default class Home extends React.Component {
     Linking.openURL(phoneNumber);
   };
 
+  _deleteData = async () => {
+    try {
+      await AsyncStorage.removeItem("cod");
+      await AsyncStorage.removeItem("username");
+      await AsyncStorage.removeItem("pwd");
+      await AsyncStorage.setItem("SignedIn", "Auth");
+      NavigationService.navigate("Login");
+    } catch (exception) {
+      return false;
+    }
+  };
+
   render() {
     if (this.state.isLoading) {
       return (
@@ -626,7 +634,9 @@ export default class Home extends React.Component {
         photo =
           "http://192.168.160.60:3000/static/media/default-user.9d1403c3.png";
       } else {
-        photo = this.state.houseDataSource["locador"]["user"]["photo"];
+        photo =
+          "data:image/jpeg;base64," +
+          this.state.userDataSource["user"]["photo"];
       }
 
       return (
@@ -658,7 +668,22 @@ export default class Home extends React.Component {
                 >
                   <View
                     style={{
-                      flex: 0.7,
+                      flex: 0.2,
+                      justifyContent: "flex-start",
+                      alignItems: "flex-end",
+                      marginTop: moderateScale(35),
+                      marginHorizontal: moderateScale(5),
+                    }}
+                  >
+                    <TouchableOpacity onPress={() => this._deleteData()}>
+                      <View style={{ paddingHorizontal: 15 }}>
+                        <Ionicons name="md-exit" size={35} color="white" />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                  <View
+                    style={{
+                      flex: 0.5,
                       justifyContent: "flex-end",
                       alignItems: "center",
                       marginBottom: moderateScale(10),
@@ -691,46 +716,52 @@ export default class Home extends React.Component {
               </ImageBackground>
             </View>
           </View>
-          <View style={{ flex: 0.6,backgroundColor:"white" }}>
-            <View style={{ flex: 0.3,marginLeft: moderateScale(10), }}>
+          <View style={{ flex: 0.6, backgroundColor: "white" }}>
+            <View style={{ flex: 0.3, marginLeft: moderateScale(10) }}>
               <View
                 style={{
                   flex: 0.5,
                   flexDirection: "row",
                   alignItems: "center",
-                  
                 }}
               >
                 <Text style={styles.facilitiesTitle}>Email: </Text>
-                <Text style={styles.featureText}>{this.state.userDataSource["user"]["email"]} </Text>
-
+                <Text style={styles.featureText}>
+                  {this.state.userDataSource["user"]["email"]}{" "}
+                </Text>
               </View>
               <View
                 style={{
                   flex: 0.5,
                   flexDirection: "row",
                   alignItems: "center",
-                  
                 }}
               >
                 <Text style={styles.facilitiesTitle}>Phone number: </Text>
-                <Text style={styles.featureText}>{this.state.userDataSource["user"]["phoneNumber"]} </Text>
-
+                <Text style={styles.featureText}>
+                  {this.state.userDataSource["user"]["phoneNumber"]}{" "}
+                </Text>
               </View>
             </View>
-            <View style={{ flex: 0.7,justifyContent:"center",alignItems:"center" }}>
-            <TouchableOpacity
-              style={styles.filter}
-              onPress={() => console.log("Favorites")}
-            > 
-            <AntDesign
-              style={styles.featureIcon}
-              name="heart"
-              size={moderateScale(30)}
-              color="#FF6E6C"
-            />
-              <Text style={styles.filterText}>Wishlist</Text>
-            </TouchableOpacity>
+            <View
+              style={{
+                flex: 0.7,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <TouchableOpacity
+                style={styles.filter}
+                onPress={() => NavigationService.navigate("Wishlist")}
+              >
+                <AntDesign
+                  style={styles.featureIcon}
+                  name="heart"
+                  size={moderateScale(30)}
+                  color="#FF6E6C"
+                />
+                <Text style={styles.filterText}>Wishlist</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -894,14 +925,14 @@ const styles = StyleSheet.create({
     elevation: 4, // TODO change elevation
     width: moderateScale(150),
     height: moderateScale(48),
-   flexDirection:"row",
+    flexDirection: "row",
     borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
   },
   filterText: {
     color: "#F3F1FF",
-    marginLeft:10,
+    marginLeft: 10,
     fontSize: moderateScale(20),
   },
   squareView: {
