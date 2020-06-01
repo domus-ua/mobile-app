@@ -29,7 +29,12 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.TQS.Domus"
+      "package": "com.TQS.Domus",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDoZX2PofG0w-AOuHSWD8RRtSq6dxeS9mA"
+        }
+      }
     }
   }
 }

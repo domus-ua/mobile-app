@@ -219,7 +219,8 @@ export default class Home extends React.Component {
       })
 
       .then((res) => {
-        if (res["results"].length!=0) {
+        console.log(res)
+        if (res["results"].length != 0) {
           this.setState({
             location: res["results"][0]["geometry"]["location"],
             isLoading: false,
@@ -252,7 +253,7 @@ export default class Home extends React.Component {
         else return response.json();
       })
       .then((data) => {
-        console.log(data);
+        //console.log(data);
         this.setState({
           houseDataSource: data,
         });
@@ -741,6 +742,7 @@ export default class Home extends React.Component {
       console.log(facilities[index]);
       components.push(
         <View
+          key={index}
           style={{
             flex: 0.25,
             flexDirection: "row",
@@ -822,7 +824,7 @@ export default class Home extends React.Component {
   renderHousePhotos = (photos) => {
     var images = [];
     for (index = 0; index < photos.length; ++index) {
-      console.log(photos[index]);
+      //console.log(photos[index]);
       images.push(
         <View
           style={{
@@ -1090,8 +1092,6 @@ export default class Home extends React.Component {
       } else {
         locadorPhoto = this.state.houseDataSource["locador"]["user"]["photo"];
       }
-
-     
 
       return (
         <View style={{ flex: 1 }}>
