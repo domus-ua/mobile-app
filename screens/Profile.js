@@ -60,7 +60,7 @@ export default class Home extends React.Component {
   async getInfo() {
     const { baseURL, userName, userPassword, houseId, userCode } = this.state;
 
-    console.log(baseURL + "api/houses/" + houseId);
+    console.log(baseURL + "api/locatarios/" + userCode);
     // fetch data
     fetch(baseURL + "api/locatarios/" + userCode, {
       method: "GET",
